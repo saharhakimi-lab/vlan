@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>שיעור 4: VLAN-ים - חלוקת רשתות לוגית | האקדמיה לרשתות</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Heebo', sans-serif;
+            background-color: #060814;
+            color: #f1f5f9;
+        }
+        .code-font {
+            font-family: 'JetBrains Mono', monospace;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b0d1e;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ec4899;
+            border-radius: 3px;
+        }
+        /* Custom Keyframe Animations for Packet waves */
+        @keyframes broadcast-ping {
+            0% { transform: scale(1); opacity: 0.9; }
+            100% { transform: scale(3.5); opacity: 0; }
+        }
+        .broadcast-wave {
+            animation: broadcast-ping 1.5s cubic-bezier(0.1, 0.8, 0.3, 1) infinite;
+        }
+
+        /* Floating Help Bot Widget */
+        #bot-fab {
+            position: fixed;
+            bottom: 24px;
+            left: 24px;
+            z-index: 200;
+            width: 64px;
+            height: 64px;
+            border-radius: 9999px;
+            background: linear-gradient(135deg, #ec4899, #d946ef, #a855f7);
+            background-size: 200% 200%;
+            animation: bot-glow 3s ease infinite;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 25px rgba(236, 72, 153, 0.5);
+            cursor: pointer;
+            border: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+            padding: 4px;
+        }
+        #bot-fab:hover { 
+            transform: scale(1.1) rotate(5deg); 
+            box-shadow: 0 15px 35px rgba(236, 72, 153, 0.7);
+        }
+        @keyframes bot-glow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        #bot-panel {
+            position: fixed;
+            bottom: 100px;
+            left: 24px;
+            z-index: 200;
+            width: 320px;
+            max-width: calc(100vw - 48px);
+            display: none;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #bot-panel.open { 
+            display: block; 
+            animation: slideUp 0.3s forwards;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .bot-ping {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 9999px;
+            background: #ef4444;
+            border: 2px solid #060814;
+            z-index: 10;
+        }
+        .bot-ping::after {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 9999px;
+            background: #ef4444;
+            animation: bot-ping-anim 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+        @keyframes bot-ping-anim {
+            75%, 100% { transform: scale(2.2); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <!-- TOP BAR -->
+    <header class="border-b border-pink-900/40 bg-slate-950/90 backdrop-blur sticky top-0 z-50 px-4 py-3">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-pink-600/20 p-2 rounded-lg border border-pink-500/30 text-pink-400">
+                    <i data-lucide="split" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h1 class="font-black text-lg tracking-wide text-white">NET_ACADEMY // <span class="text-pink-400">CLASS_04</span></h1>
+                    <p class="text-xs text-slate-400">VLAN-ים וחלוקת רשתות: שרטוט החומות הלוגיות ברשת</p>
+                </div>
+            </div>
+            
+            <!-- Gamification & Progress Status -->
+            <div class="flex items-center gap-6">
+                <div class="hidden md:flex items-center gap-2 bg-slate-900 px-3 py-1.5 rounded-full border border-slate-800">
+                    <span class="text-xs text-slate-400">רמה:</span>
+                    <span class="text-xs font-bold text-pink-400" id="user-level">שוליית נתבים</span>
+                    <div class="w-16 bg-slate-800 h-1.5 rounded-full overflow-hidden">
+                        <div id="level-bar" class="bg-pink-500 h-full w-2/5 transition-all duration-500"></div>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2 bg-pink-950/40 border border-pink-500/30 px-3 py-1.5 rounded-lg text-pink-400">
+                    <i data-lucide="zap" class="w-4 h-4 text-yellow-400 animate-pulse"></i>
+                    <span class="text-xs font-bold">XP:</span>
+                    <span class="text-sm font-black code-font" id="xp-counter">0</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN BODY -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        <!-- SIDEBAR -->
+        <aside class="lg:col-span-3 flex flex-col gap-4">
+            <div class="bg-slate-950/80 border border-slate-800/80 rounded-xl p-5">
+                <h3 class="text-sm font-bold text-slate-300 mb-4 tracking-wider uppercase border-b border-slate-800 pb-2">מפת המשימה</h3>
+                <nav class="flex flex-col gap-2">
+                    <!-- Step 1 -->
+                    <button id="btn-step-1" onclick="switchStep(1)" class="w-full text-right flex items-center justify-between p-3 rounded-lg bg-pink-950/30 border border-pink-500/40 text-pink-300 transition-all font-bold">
+                        <div class="flex items-center gap-3">
+                            <span class="code-font text-xs opacity-60">01.</span>
+                            <span>פרשת ההאזנות בסטארטאפ</span>
+                        </div>
+                        <i data-lucide="lock" class="w-4 h-4 text-pink-400"></i>
+                    </button>
+                    <!-- Step 2 -->
+                    <button id="btn-step-2" onclick="switchStep(2)" class="w-full text-right flex items-center justify-between p-3 rounded-lg bg-slate-900/40 border border-slate-800 text-slate-400 hover:bg-slate-900 hover:text-slate-200 transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="code-font text-xs opacity-60">02.</span>
+                            <span>איך VLAN עובד? (Tagging)</span>
+                        </div>
+                        <i data-lucide="tag" class="w-4 h-4 opacity-50"></i>
+                    </button>
+                    <!-- Step 3 -->
+                    <button id="btn-step-3" onclick="switchStep(3)" class="w-full text-right flex items-center justify-between p-3 rounded-lg bg-slate-900/40 border border-slate-800 text-slate-400 hover:bg-slate-900 hover:text-slate-200 transition-all">
+                        <div class="flex items-center justify-between p-3 rounded-lg text-slate-400">
+                            <div class="flex items-center gap-3">
+                                <span class="code-font text-xs opacity-60">03.</span>
+                                <span>סימולטור בידוד פורטים</span>
+                            </div>
+                            <i data-lucide="grid" class="w-4 h-4 opacity-50"></i>
+                        </div>
+                    </button>
+                    <!-- Step 4 -->
+                    <button id="btn-step-4" onclick="switchStep(4)" class="w-full text-right flex items-center justify-between p-3 rounded-lg bg-slate-900/40 border border-slate-800 text-slate-400 hover:bg-slate-900 hover:text-slate-200 transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="code-font text-xs opacity-60">04.</span>
+                            <span>ארכיטקטורת פרומפטים</span>
+                        </div>
+                        <i data-lucide="cpu" class="w-4 h-4 opacity-50"></i>
+                    </button>
+                    <!-- Step 5 -->
+                    <button id="btn-step-5" onclick="switchStep(5)" class="w-full text-right flex items-center justify-between p-3 rounded-lg bg-slate-900/40 border border-slate-800 text-slate-400 hover:bg-slate-900 hover:text-slate-200 transition-all">
+                        <div class="flex items-center gap-3">
+                            <span class="code-font text-xs opacity-60">05.</span>
+                            <span>לוח פתרונות וסיום</span>
+                        </div>
+                        <i data-lucide="award" class="w-4 h-4 opacity-50"></i>
+                    </button>
+                </nav>
+            </div>
+
+            <!-- SYSTEM LOG -->
+            <div class="bg-slate-950/80 border border-slate-800/80 rounded-xl p-5 flex-grow flex flex-col justify-between">
+                <div>
+                    <h4 class="text-xs font-bold text-slate-400 tracking-wider mb-3">יומן התקשרות VLAN</h4>
+                    <div id="system-log" class="text-xs code-font text-pink-500/80 space-y-2 h-48 overflow-y-auto bg-slate-900/50 p-3 rounded border border-slate-800">
+                        <p>[13:22:01] מתג Switch_Cisco_3560 הופעל.</p>
+                        <p>[13:22:02] כל הפורטים משוייכים כעת ל-VLAN 1 כברירת מחדל.</p>
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-slate-800/50">
+                    <button onclick="resetProgress()" class="text-xs text-red-400 hover:text-red-300 flex items-center gap-1.5 transition-colors">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                        <span>אפס התקדמות שיעור</span>
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- CONTENT DISPLAY AREA -->
+        <section class="lg:col-span-9 flex flex-col gap-6">
+
+            <!-- STEP 1: THE CRISIS -->
+            <div id="step-1" class="step-container space-y-6">
+                <div class="bg-gradient-to-r from-pink-950/40 to-slate-950 border border-pink-900/40 rounded-2xl p-6 md:p-8 relative overflow-hidden">
+                    <div class="absolute -right-20 -top-20 w-80 h-80 bg-pink-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                    <span class="bg-pink-900/60 border border-pink-400/30 text-pink-300 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-widest">תרחיש אבטחה אמיתי</span>
+                    
+                    <h2 class="text-2xl md:text-3xl font-black text-white mt-4 mb-3">איך האקר זוטר קורא את טבלאות השכר?</h2>
+                    <p class="text-slate-300 leading-relaxed text-base">
+                        חברת הסטארטאפ שלכם הושקה בהצלחה. אבל יש בעיה קריטית: כל העובדים מחוברים לאותו מתג פיזי גדול במסדרון. 
+                        כאשר מחלקת משאבי אנוש (HR) שולחת קובץ שכר חסוי להדפסה, המדפסת מבצעת שידור Broadcast לכל הרשת המקומית כדי להכריז על נוכחותה. 
+                        האקר משועמם ממחלקת הפיתוח שמפעיל תוכנת האזנה פשוטה (Wireshark) יכול לתפוס את חבילות המידע האלה בקלות ולקרוא הכל!
+                    </p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                        <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl">
+                            <h3 class="text-pink-400 font-bold mb-2 flex items-center gap-2">
+                                <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                                זליגת מידע וריגול (Data Leakage)
+                            </h3>
+                            <p class="text-xs text-slate-400 leading-relaxed">
+                                ללא הפרדה פיזית או לוגית, כל משתמש ברשת משתף את אותו דומיין שידור (Broadcast Domain). הודעות רגישות של הנהלה או כספים מגיעות גם למחשבי האורחים והעובדים.
+                            </p>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 p-5 rounded-xl">
+                            <h3 class="text-cyan-400 font-bold mb-2 flex items-center gap-2">
+                                <i data-lucide="activity" class="w-5 h-5"></i>
+                                עומס וסופות שידור (Broadcast Storms)
+                            </h3>
+                            <p class="text-xs text-slate-400 leading-relaxed">
+                                כאשר 200 מחשבים משדרים בו-זמנית בקשות רשת לאוויר, רוחב הפס של כולם יורד משמעותית. המחשבים צריכים לעבד חבילות שלא מיועדות אליהם כלל.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-6 bg-slate-900/50 p-5 rounded-xl border border-slate-800/80">
+                        <p class="text-xs text-slate-300 font-bold mb-3">שאלה מהירה: מהו הפתרון הזול והנכון ביותר למנוע מהפיתוח להאזין למשאבי אנוש?</p>
+                        <div class="flex flex-col gap-2">
+                            <button onclick="answerScenario(1)" class="bg-slate-950 hover:bg-slate-800 text-right border border-slate-700 text-slate-300 text-xs px-4 py-2.5 rounded transition-all">לקנות מתג פיזי נוסף בעלות של אלפי דולרים ולהעביר כבלים חדשים בקירות רק למשאבי אנוש.</button>
+                            <button onclick="answerScenario(2)" class="bg-slate-950 hover:bg-slate-800 text-right border border-slate-700 text-slate-300 text-xs px-4 py-2.5 rounded transition-all">להשתמש ב-VLAN-ים כדי לחלק את המתג הקיים לוגית לשני מתגים עצמאיים ומבודדים לחלוטין.</button>
+                        </div>
+                        <div id="scenario-feedback" class="mt-4 hidden p-3 rounded-lg text-xs font-semibold"></div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button onclick="switchStep(2)" class="bg-pink-600 hover:bg-pink-500 text-white font-bold px-6 py-3 rounded-xl flex items-center gap-2 transition-all">
+                        <span>גלה איך VLAN עובד</span>
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 2: THEORY -->
+            <div id="step-2" class="step-container space-y-6 hidden">
+                <div class="bg-slate-950 border border-slate-800/80 rounded-2xl p-6 md:p-8">
+                    <span class="text-pink-400 text-xs font-bold uppercase tracking-wider">תיאוריה חיונית</span>
+                    <h2 class="text-2xl font-black text-white mt-2 mb-4">איך מתג פיזי אחד הופך לשניים?</h2>
+                    
+                    <p class="text-slate-300 leading-relaxed mb-6">
+                        טכנולוגיית <span class="text-pink-400 font-bold">VLAN (Virtual Local Area Network)</span> מאפשרת לנו לקחת מתג רשת יחיד ולקבוע חוקים לוגיים: מי שייך לאיזו קבוצה. המידע בין הקבוצות לא יעבור אלא אם נשתמש בנתב (ראוטר) שיאשר זאת במפורש!
+                    </p>
+
+                    <!-- VLAN Tagging representation -->
+                    <div class="bg-slate-900 p-6 rounded-xl border border-slate-800 max-w-xl mx-auto space-y-4">
+                        <div class="text-center text-xs text-slate-400 font-bold">מבנה פריים עם תגית VLAN (פרוטוקול 802.1Q):</div>
+                        
+                        <div class="flex justify-center items-center gap-1 text-xs font-mono tracking-wider text-white">
+                            <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded" title="MAC Destination">Destination MAC</span>
+                            <span class="text-slate-500">→</span>
+                            <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded" title="MAC Source">Source MAC</span>
+                            <span class="text-slate-500">→</span>
+                            <span class="bg-pink-900/40 border border-pink-500/50 px-3 py-1.5 rounded text-pink-300 font-bold" title="מזהה ה-VLAN (עשוי להיות בין 1 ל-4094)">VLAN TAG (802.1Q)</span>
+                            <span class="text-slate-500">→</span>
+                            <span class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded" title="Payload Data">Data / Payload</span>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs pt-4 border-t border-slate-800/80">
+                            <div class="text-right">
+                                <span class="block text-pink-400 font-bold">תגית ה-802.1Q:</span>
+                                <span class="text-slate-400">המתג "מצמיד" מספר מזהה (VLAN ID) לכל פריים שנכנס לפורט מסוים. למשל: פריים שנכנס מפורט משאבי אנוש יסומן כ-<b>VLAN 10</b>.</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="block text-cyan-400 font-bold">חסימה בצמתים:</span>
+                                <span class="text-slate-400">כשהפריים רוצה לצאת מפורט אחר, המתג בודק: "האם פורט היעד שייך גם הוא ל-VLAN 10?". אם לא, הפריים פשוט נמחק ונזרק מיד!</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-pink-950/20 border border-pink-900/30 p-5 rounded-xl mt-6">
+                        <h3 class="text-white font-bold text-sm mb-1 flex items-center gap-2">
+                            <i data-lucide="help-circle" class="w-4 h-4 text-pink-400"></i>
+                            מה זה Trunk Port?
+                        </h3>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            כשיש לנו מספר מתגים בבניינים שונים ואנחנו רוצים להעביר את כל ה-VLAN-ים על גבי כבל פיזי בודד, אנחנו מגדירים את הפורט המחבר כ-<b>Trunk</b>. פורט זה מאפשר למספר VLAN-ים לעבור עליו תוך שמירה על המזהה הייחודי של כל אחד מהם!
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="flex justify-between">
+                    <button onclick="switchStep(1)" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-bold px-5 py-3 rounded-xl flex items-center gap-2 transition-all">
+                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        <span>חזרה לפרשה</span>
+                    </button>
+                    <button onclick="switchStep(3)" class="bg-pink-600 hover:bg-pink-500 text-white font-bold px-6 py-3 rounded-xl flex items-center gap-2 transition-all">
+                        <span>לסימולטור בידוד פורטים</span>
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 3: INTERACTIVE VLAN CONFIGURATOR -->
+            <div id="step-3" class="step-container space-y-6 hidden">
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 md:p-8">
+                    <span class="bg-pink-900/60 border border-pink-400/30 text-pink-300 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-widest">תחנת למידה מעשית</span>
+                    <h2 class="text-2xl font-black text-white mt-3">סימולטור: הפרדת פורטים וחומות לוגיות</h2>
+                    <p class="text-slate-400 text-sm mt-1">לחץ על הפורטים של המתג כדי לשייך אותם ל-VLAN-ים המתאימים. המטרה: לבודד לחלוטין את משאבי אנוש מפיתוח ואורחים!</p>
+
+                    <!-- Switch Interactive Board -->
+                    <div class="mt-8 bg-slate-900 rounded-xl p-6 border border-slate-800 relative flex flex-col justify-between">
+                        
+                        <!-- Color Palette Legend -->
+                        <div class="flex flex-wrap gap-4 mb-6 justify-center">
+                            <button onclick="setActiveVlanConfig('vlan10')" id="pal-vlan10" class="px-3 py-1.5 rounded text-xs font-bold border border-pink-500/50 bg-pink-950/40 text-pink-300 flex items-center gap-1.5 transition-all">
+                                <span class="w-3 h-3 rounded-full bg-pink-500"></span>
+                                <span>VLAN 10 (HR)</span>
+                            </button>
+                            <button onclick="setActiveVlanConfig('vlan20')" id="pal-vlan20" class="px-3 py-1.5 rounded text-xs font-bold border border-slate-700 bg-slate-800 text-slate-400 flex items-center gap-1.5 transition-all">
+                                <span class="w-3 h-3 rounded-full bg-cyan-400"></span>
+                                <span>VLAN 20 (R&D)</span>
+                            </button>
+                            <button onclick="setActiveVlanConfig('vlan30')" id="pal-vlan30" class="px-3 py-1.5 rounded text-xs font-bold border border-slate-700 bg-slate-800 text-slate-400 flex items-center gap-1.5 transition-all">
+                                <span class="w-3 h-3 rounded-full bg-yellow-500"></span>
+                                <span>VLAN 30 (Guest)</span>
+                            </button>
+                        </div>
+
+                        <!-- Visual Switch Panel -->
+                        <div class="bg-slate-950 border-4 border-slate-800 rounded-xl p-6 max-w-xl mx-auto w-full">
+                            <div class="flex justify-between items-center mb-4 border-b border-slate-800 pb-2">
+                                <span class="text-[10px] text-slate-500 font-mono">24-PORT FASTETHERNET POE SWITCH</span>
+                                <div class="flex gap-1">
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                </div>
+                            </div>
+
+                            <!-- Ports Grid -->
+                            <div class="grid grid-cols-6 gap-3 md:gap-4 justify-items-center">
+                                <!-- Port 1 -->
+                                <div onclick="assignPortVlan(1)" id="port-card-1" class="w-14 h-16 bg-slate-900 border border-slate-700 rounded-lg flex flex-col items-center justify-between p-1 cursor-pointer hover:border-slate-500 transition-all">
+                                    <span class="text-[9px] text-slate-500">Fa0/1</span>
+                                    <div id="port-led-1" class="w-3 h-3 rounded bg-slate-700"></div>
+                                    <span id="port-lbl-1" class="text-[9px] text-slate-400 font-mono">V1</span>
+                                </div>
+                                <!-- Port 2 -->
+                                <div onclick="assignPortVlan(2)" id="port-card-2" class="w-14 h-16 bg-slate-900 border border-slate-700 rounded-lg flex flex-col items-center justify-between p-1 cursor-pointer hover:border-slate-500 transition-all">
+                                    <span class="text-[9px] text-slate-500">Fa0/2</span>
+                                    <div id="port-led-2" class="w-3 h-3 rounded bg-slate-700"></div>
+                                    <span id="port-lbl-2" class="text-[9px] text-slate-400 font-mono">V1</span>
+                                </div>
+                                <!-- Port 3 -->
+                                <div onclick="assignPortVlan(3)" id="port-card-3" class="w-14 h-16 bg-slate-900 border border-slate-700 rounded-lg flex flex-col items-center justify-between p-1 cursor-pointer hover:border-slate-500 transition-all">
+                                    <span class="text-[9px] text-slate-500">Fa0/3</span>
+                                    <div id="port-led-3" class="w-3 h-3 rounded bg-slate-700"></div>
+                                    <span id="port-lbl-3" class="text-[9px] text-slate-400 font-mono">V1</span>
+                                </div>
+                                <!-- Port 4 -->
+                                <div onclick="assignPortVlan(4)" id="port-card-4" class="w-14 h-16 bg-slate-900 border border-slate-700 rounded-lg flex flex-col items-center justify-between p-1 cursor-pointer hover:border-slate-500 transition-all">
+                                    <span class="text-[9px] text-slate-500">Fa0/4</span>
+                                    <div id="port-led-4" class="w-3 h-3 rounded bg-slate-700"></div>
+                                    <span id="port-lbl-4" class="text-[9px] text-slate-400 font-mono">V1</span>
+                                </div>
+                                <!-- Port 5 -->
+                                <div onclick="assignPortVlan(5)" id="port-card-5" class="w-14 h-16 bg-slate-900 border border-slate-700 rounded-lg flex flex-col items-center justify-between p-1 cursor-pointer hover:border-slate-500 transition-all">
+                                    <span class="text-[9px] text-slate-500">Fa0/5</span>
+                                    <div id="port-led-5" class="w-3 h-3 rounded bg-slate-700"></div>
+                                    <span id="port-lbl-5" class="text-[9px] text-slate-400 font-mono">V1</span>
+                                </div>
+                                <!-- Port 6 -->
+                                <div onclick="assignPortVlan(6)" id="port-card-6" class="w-14 h-16 bg-slate-900 border border-slate-700 rounded-lg flex flex-col items-center justify-between p-1 cursor-pointer hover:border-slate-500 transition-all">
+                                    <span class="text-[9px] text-slate-500">Fa0/6</span>
+                                    <div id="port-led-6" class="w-3 h-3 rounded bg-slate-700"></div>
+                                    <span id="port-lbl-6" class="text-[9px] text-slate-400 font-mono">V1</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hosts & Descriptions -->
+                        <div class="grid grid-cols-3 gap-2 text-center text-[10px] mt-4 max-w-xl mx-auto border-t border-slate-800 pt-3">
+                            <div>
+                                <p class="text-pink-400 font-bold">Fa0/1 & Fa0/2</p>
+                                <p class="text-slate-500">משרדי HR וסמנכ"ל כספים</p>
+                            </div>
+                            <div>
+                                <p class="text-cyan-400 font-bold">Fa0/3 & Fa0/4</p>
+                                <p class="text-slate-500">עמדות פיתוח R&D</p>
+                            </div>
+                            <div>
+                                <p class="text-yellow-500 font-bold">Fa0/5 & Fa0/6</p>
+                                <p class="text-slate-500">אורחים ואינטרנט פתוח</p>
+                            </div>
+                        </div>
+
+                        <!-- Test Actions -->
+                        <div class="border-t border-slate-800 pt-4 mt-6 flex flex-col sm:flex-row justify-between items-center gap-4 bg-slate-900/95 rounded-lg p-3">
+                            <div class="text-xs text-slate-300">
+                                <p class="font-bold">הרץ בדיקת דומיין שידור:</p>
+                                <p class="text-slate-400">שגר שידור Broadcast מפורט 1 (HR) ובדוק האם הוא מגיע לעמדות הפיתוח או האורחים.</p>
+                            </div>
+                            <div class="flex gap-2 w-full sm:w-auto">
+                                <button onclick="triggerVlanTest()" class="w-full sm:w-auto bg-pink-600 hover:bg-pink-500 text-white font-bold px-4 py-2 rounded-lg text-xs transition-all flex items-center justify-center gap-1.5">
+                                    <i data-lucide="send" class="w-4 h-4"></i>
+                                    <span>שגר שידור (Broadcast)</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="sim-feedback" class="mt-4 hidden p-4 rounded-xl text-xs font-bold"></div>
+                </div>
+
+                <div class="flex justify-between">
+                    <button onclick="switchStep(2)" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-bold px-5 py-3 rounded-xl flex items-center gap-2 transition-all">
+                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        <span>חזרה להסבר</span>
+                    </button>
+                    <button id="btn-to-step-4" onclick="switchStep(4)" class="bg-pink-600 hover:bg-pink-500 text-white font-bold px-6 py-3 rounded-xl flex items-center gap-2 transition-all disabled:opacity-40 disabled:pointer-events-none" disabled>
+                        <span>המשך לתכנון פרומפט AI</span>
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 4: PROMPT ENGINEERING ARCHITECT (AI STEP) -->
+            <div id="step-4" class="step-container space-y-6 hidden">
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 md:p-8">
+                    <div class="flex justify-between items-start flex-wrap gap-4 border-b border-slate-800 pb-4">
+                        <div>
+                            <span class="bg-pink-900/60 border border-pink-400/30 text-pink-300 text-xs px-3 py-1 rounded-full font-bold uppercase tracking-widest">סדנת ה-AI המקצועית</span>
+                            <h2 class="text-2xl font-black text-white mt-3">ארכיטקטורת פרומפטים: חלוקת קמפוס</h2>
+                            <p class="text-slate-400 text-sm mt-1">כעת תתפקד כמעצב רשתות ראשי. בנה פרומפט מקיף כדי להנחות את ה-AI לתכנן חלוקת VLAN עבור בית ספר תיכון בעל מספר בניינים!</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mt-6">
+                        <!-- Left Side: Prompt Block Builder -->
+                        <div class="md:col-span-5 bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-4">
+                            <h3 class="text-xs font-bold text-white tracking-wide uppercase border-b border-slate-800 pb-2">הרכב פרומפט לתכנון VLAN:</h3>
+                            
+                            <!-- Block 1: Scenario Scale -->
+                            <div>
+                                <label class="block text-xs text-pink-400 font-bold mb-1">1. הגדר את היקף המוסד (Scale):</label>
+                                <select id="prompt-scale" onchange="updatePromptPreview()" class="w-full bg-slate-950 text-xs text-white p-2.5 rounded border border-slate-800 focus:outline-none focus:border-pink-500">
+                                    <option value="none">-- בחר היקף קמפוס --</option>
+                                    <option value="school">בית ספר עם 4 בניינים, 1,000 תלמידים ורשת אורחים חופשית</option>
+                                    <option value="office">משרדי הייטק של 3 קומות עם מחלקות הנהלה, פיתוח וקופות</option>
+                                    <option value="hospital">מרכז רפואי רגיש המחייב בידוד מוחלט לציוד רפואי ורשת רופאים</option>
+                                </select>
+                            </div>
+
+                            <!-- Block 2: Security Constraints -->
+                            <div>
+                                <label class="block text-xs text-pink-400 font-bold mb-1">2. הגדר מגבלות אבטחה (Constraints):</label>
+                                <select id="prompt-constraints" onchange="updatePromptPreview()" class="w-full bg-slate-950 text-xs text-white p-2.5 rounded border border-slate-800 focus:outline-none focus:border-pink-500">
+                                    <option value="none">-- בחר מגבלת אבטחה --</option>
+                                    <option value="isolate">חסימת תקשורת מוחלטת בין רשת הסטודנטים/אורחים לרשת המנהלה</option>
+                                    <option value="moderate">אישור מעבר תקשורת מנוהל ומוגבל לשרתים מרכזיים בלבד</option>
+                                    <option value="open">מעבר חופשי ללא הגבלות (לצורכי שיתוף משאבים מהיר)</option>
+                                </select>
+                            </div>
+
+                            <!-- Block 3: IP Strategy -->
+                            <div>
+                                <label class="block text-xs text-pink-400 font-bold mb-1">3. הגדרת אסטרטגיית חלוקת IP:</label>
+                                <select id="prompt-ip" onchange="updatePromptPreview()" class="w-full bg-slate-950 text-xs text-white p-2.5 rounded border border-slate-800 focus:outline-none focus:border-pink-500">
+                                    <option value="none">-- בחר שיטת חלוקת IP --</option>
+                                    <option value="subnet">חלוקה לכתובות IP מסוג Subnets (למשל 192.168.10.0 לכל VLAN)</option>
+                                    <option value="flat">כתובת IP שטוחה ויחידה לכולם (ללא סאבנטים נפרדים)</option>
+                                </select>
+                            </div>
+
+                            <!-- Live Prompt Preview Panel -->
+                            <div class="bg-slate-950 p-3 rounded border border-slate-800">
+                                <span class="text-[9px] text-slate-500 block">הפרומפט המורכב שישוגר למעבד:</span>
+                                <p id="prompt-preview" class="text-[11px] font-mono text-slate-400 mt-1 whitespace-pre-wrap">בחר פרמטרים למעלה...</p>
+                            </div>
+                        </div>
+
+                        <!-- Right Side: AI Output Simulation -->
+                        <div class="md:col-span-7 bg-slate-900 border border-slate-800 p-5 rounded-xl flex flex-col justify-between min-h-[400px]">
+                            <div>
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-xs font-bold text-white">תוכנית הרשת שחוללה על ידי ה-AI:</h3>
+                                    <div id="prompt-score-tag" class="hidden px-2 py-0.5 rounded text-[10px] font-bold"></div>
+                                </div>
+                                <div id="ai-response-box" class="text-xs text-slate-300 leading-relaxed bg-slate-950 p-4 rounded-lg border border-slate-800 h-[280px] overflow-y-auto font-sans">
+                                    אנא הגדר את רכיבי הפרומפט משמאל, ולאחר מכן לחץ על "נתח ושרטט תוכנית רשת".
+                                </div>
+                            </div>
+
+                            <button onclick="runVlanPromptSimulator()" class="w-full bg-pink-600 hover:bg-pink-500 text-white font-bold py-3 rounded-lg text-xs transition-all flex items-center justify-center gap-2 mt-4">
+                                <i data-lucide="play" class="w-4 h-4"></i>
+                                <span>נתח ושרטט תוכנית רשת</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Achievement Alert -->
+                    <div id="prompt-achievement" class="mt-4 hidden bg-pink-950/40 border border-pink-500/30 text-pink-300 p-4 rounded-xl flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">🏆</span>
+                            <div>
+                                <p class="font-bold">הישג נפתח! מומחה הפרדה וירטואלית</p>
+                                <p class="text-xs opacity-80">הרכבת פרומפט מקצועי המספק פתרון VLAN ו-Subnetting משולב למניעת פריצות סייבר.</p>
+                            </div>
+                        </div>
+                        <span class="font-mono text-xs text-yellow-400 font-bold">+80 XP</span>
+                    </div>
+
+                </div>
+                <div class="flex justify-between">
+                    <button onclick="switchStep(3)" class="bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-300 font-bold px-5 py-3 rounded-xl flex items-center gap-2 transition-all">
+                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
+                        <span>חזרה לסימולטור</span>
+                    </button>
+                    <button id="btn-to-step-5" onclick="switchStep(5)" class="bg-pink-600 hover:bg-pink-500 text-white font-bold px-6 py-3 rounded-xl flex items-center gap-2 transition-all disabled:opacity-40 disabled:pointer-events-none" disabled>
+                        <span>המשך לסיכום המשימה</span>
+                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 5: REFLECTION & ACTION REPORT -->
+            <div id="step-5" class="step-container space-y-6 hidden">
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 md:p-8">
+                    <span class="text-pink-400 text-xs font-bold uppercase tracking-wider">משוב עמיתים וסגירת דוח</span>
+                    <h2 class="text-2xl font-black text-white mt-2 mb-4">תעודת מעצב הרשתות הלוגיות שלך מוכנה!</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Reflection Form -->
+                        <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 space-y-4">
+                            <h3 class="font-bold text-white text-base">רפלקציה עצמית למורה</h3>
+                            <p class="text-xs text-slate-400">השלם את המחשבות שלך על השיעור והמידע הזה יישלח למורה שלך בקליק.</p>
+                            
+                            <div class="space-y-3">
+                                <div>
+                                    <label class="block text-xs text-slate-300 mb-1">1. מהו היתרון המרכזי של שימוש ב-VLAN מבחינת ניצול חומרה ועלויות?</label>
+                                    <textarea id="reflection-q1" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-white focus:outline-none focus:border-pink-500" rows="2" placeholder="למשל: הוא חוסך קנייה של מתגים פיזיים מרובים ומאפשר לחלק את החומרה הקיימת לוגית..."></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-300 mb-1">2. מדוע תעבורה בין שני VLAN-ים שונים חייבת לעבור דרך ראוטר (שכבה 3)?</label>
+                                    <textarea id="reflection-q2" class="w-full bg-slate-950 border border-slate-800 rounded p-2.5 text-xs text-white focus:outline-none focus:border-pink-500" rows="2" placeholder="למשל: כי מתג רגיל עובד בשכבה 2 ולא מסוגל להעביר מידע בין רשתות IP שונות..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Share card and report exports -->
+                        <div class="bg-slate-900 p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+                            <div>
+                                <h3 class="font-bold text-white text-base mb-2">שתף הצלחה עם החברים</h3>
+                                <p class="text-xs text-slate-400 mb-4">העתק את קוד ההישג שלך ושתף אותו כדי להוכיח חלוקה לוגית חסינת סייבר!</p>
+                                
+                                <div class="bg-slate-950 p-3 rounded border border-slate-800 code-font text-xs flex justify-between items-center text-pink-400">
+                                    <span id="share-code">NET-ACAD-CLASS4-PENDING</span>
+                                    <button onclick="copyShareCode()" class="text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1">
+                                        <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+                                        <span>העתק</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mt-6 pt-6 border-t border-slate-800/80 space-y-3">
+                                <button onclick="exportTeacherReport()" class="w-full bg-pink-600 hover:bg-pink-500 text-white font-bold py-2.5 rounded-lg text-sm transition-all flex items-center justify-center gap-2">
+                                    <i data-lucide="download" class="w-4 h-4"></i>
+                                    <span>ייצא דוח מסכם למורה</span>
+                                </button>
+                                <p class="text-[10px] text-slate-400 text-center">בלחיצה כאן יורד קובץ טקסט פשוט שמכיל את התשובות שלך, שאותו תוכל לשלוח למורה.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-slate-900 bg-slate-950 py-4 px-4 text-center">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4 text-xs text-slate-500">
+            <p>© 2026 NET_ACADEMY - הדרך שלך לרשתות ותקשורת מחשבים</p>
+            <div class="flex gap-4">
+                <span>שיעור 4 מתוך 10</span>
+                <span>•</span>
+                <span class="text-pink-400 font-bold">RTL תומך באופן מלא</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Notification system toast -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 border border-pink-500 text-white px-4 py-3 rounded-xl shadow-2xl z-50 transform translate-y-20 opacity-0 transition-all duration-300 flex items-center gap-3">
+        <i data-lucide="info" class="w-5 h-5 text-pink-400" id="toast-icon"></i>
+        <span id="toast-message" class="text-sm"></span>
+    </div>
+
+    <!-- MAIN JAVASCRIPT LOGIC -->
+    <script>
+        // State management
+        let xp = 0;
+        let activeStep = 1;
+        let currentLevel = "שוליית נתבים";
+        let hasPassedSim = false;
+        let hasPassedPrompt = false;
+
+        // Simulator State
+        let activeVlanColor = 'vlan10'; // Default painter selection
+        let portAssignments = {
+            1: 'none',
+            2: 'none',
+            3: 'none',
+            4: 'none',
+            5: 'none',
+            6: 'none'
+        };
+
+        const xpCounter = document.getElementById('xp-counter');
+        const userLevel = document.getElementById('user-level');
+        const levelBar = document.getElementById('level-bar');
+        const systemLog = document.getElementById('system-log');
+        const toastEl = document.getElementById('toast');
+        const toastMsg = document.getElementById('toast-message');
+
+        lucide.createIcons();
+
+        window.onload = function() {
+            loadSavedProgress();
+        };
+
+        function loadSavedProgress() {
+            const savedXp = localStorage.getItem('net_academy_l4_xp');
+            const savedStep = localStorage.getItem('net_academy_l4_step');
+            const savedLevel = localStorage.getItem('net_academy_l4_level');
+            const savedQ1 = localStorage.getItem('net_academy_l4_q1');
+            const savedQ2 = localStorage.getItem('net_academy_l4_q2');
+
+            if (savedXp) {
+                xp = parseInt(savedXp);
+                xpCounter.innerText = xp;
+            } else {
+                xp = 180; // default starting XP from Lesson 3
+                xpCounter.innerText = xp;
+            }
+
+            if (savedLevel) {
+                currentLevel = savedLevel;
+                userLevel.innerText = currentLevel;
+                updateLevelUI();
+            }
+
+            if (savedQ1) document.getElementById('reflection-q1').value = savedQ1;
+            if (savedQ2) document.getElementById('reflection-q2').value = savedQ2;
+
+            if (savedStep) {
+                switchStep(parseInt(savedStep));
+            } else {
+                switchStep(1);
+            }
+            addLog("התקדמות קודמת לשיעור 4 נטענה מהדפדפן.");
+        }
+
+        function saveProgress() {
+            localStorage.setItem('net_academy_l4_xp', xp);
+            localStorage.setItem('net_academy_l4_step', activeStep);
+            localStorage.setItem('net_academy_l4_level', currentLevel);
+            localStorage.setItem('net_academy_l4_q1', document.getElementById('reflection-q1').value);
+            localStorage.setItem('net_academy_l4_q2', document.getElementById('reflection-q2').value);
+        }
+
+        function resetProgress() {
+            if (confirm("האם ברצונך לאפס את התקדמות שיעור 4? כל הניקוד שהושג בשיעור יימחק.")) {
+                localStorage.removeItem('net_academy_l4_xp');
+                localStorage.removeItem('net_academy_l4_step');
+                localStorage.removeItem('net_academy_l4_level');
+                localStorage.removeItem('net_academy_l4_q1');
+                localStorage.removeItem('net_academy_l4_q2');
+                
+                xp = 180;
+                activeStep = 1;
+                hasPassedSim = false;
+                hasPassedPrompt = false;
+                currentLevel = "שוליית נתבים";
+
+                xpCounter.innerText = xp;
+                userLevel.innerText = currentLevel;
+                levelBar.style.width = "40%";
+                
+                document.getElementById('reflection-q1').value = "";
+                document.getElementById('reflection-q2').value = "";
+                
+                document.getElementById('btn-to-step-4').disabled = true;
+                document.getElementById('btn-to-step-5').disabled = true;
+                document.getElementById('sim-feedback').classList.add('hidden');
+                document.getElementById('prompt-achievement').classList.add('hidden');
+                
+                // Reset ports assignment
+                for (let i = 1; i <= 6; i++) {
+                    portAssignments[i] = 'none';
+                    const led = document.getElementById(`port-led-${i}`);
+                    const lbl = document.getElementById(`port-lbl-${i}`);
+                    led.className = "w-3 h-3 rounded bg-slate-700";
+                    lbl.innerText = "V1";
+                    lbl.className = "text-[9px] text-slate-400 font-mono";
+                }
+
+                switchStep(1);
+                showToast("ההתקדמות בשיעור 4 אופסה.");
+                addLog("כל התקדמות המשתמש בשיעור זה אופסה.");
+            }
+        }
+
+        function switchStep(stepNum) {
+            for (let i = 1; i <= 5; i++) {
+                document.getElementById(`step-${i}`).classList.add('hidden');
+                const btn = document.getElementById(`btn-step-${i}`);
+                if (btn) {
+                    btn.className = "w-full text-right flex items-center justify-between p-3 rounded-lg bg-slate-900/40 border border-slate-800 text-slate-400 hover:bg-slate-900 hover:text-slate-200 transition-all";
+                }
+            }
+
+            document.getElementById(`step-${stepNum}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`btn-step-${stepNum}`);
+            if (activeBtn) {
+                activeBtn.className = "w-full text-right flex items-center justify-between p-3 rounded-lg bg-pink-950/30 border border-pink-500/40 text-pink-300 transition-all font-bold";
+            }
+
+            activeStep = stepNum;
+            saveProgress();
+            addLog(`מעבר לשלב ${stepNum}.`);
+        }
+
+        function addLog(text) {
+            const time = new Date().toLocaleTimeString('he-IL', { hour12: false });
+            systemLog.innerHTML += `<p>[${time}] ${text}</p>`;
+            systemLog.scrollTop = systemLog.scrollHeight;
+        }
+
+        function showToast(message) {
+            toastMsg.innerText = message;
+            toastEl.classList.remove('translate-y-20', 'opacity-0');
+            toastEl.classList.add('translate-y-0', 'opacity-100');
+            setTimeout(() => {
+                toastEl.classList.remove('translate-y-0', 'opacity-100');
+                toastEl.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+
+        function addXP(amount) {
+            xp += amount;
+            xpCounter.innerText = xp;
+            
+            if (xp >= 380) {
+                currentLevel = "מומחה סאבנטים ו-VLAN";
+                levelBar.style.width = "100%";
+            } else if (xp >= 280) {
+                currentLevel = "מנתח מתגים מומחה";
+                levelBar.style.width = "75%";
+            } else {
+                currentLevel = "שוליית נתבים";
+                levelBar.style.width = "40%";
+            }
+            
+            userLevel.innerText = currentLevel;
+            updateLevelUI();
+            saveProgress();
+            showToast(`נוספו +${amount} נקודות XP!`);
+        }
+
+        function updateLevelUI() {
+            document.getElementById('share-code').innerText = `NET-ACAD-L4-XP${xp}-${currentLevel.replace(/ /g, '_')}`;
+        }
+
+        // STEP 1: Scenario response
+        function answerScenario(choice) {
+            const feedback = document.getElementById('scenario-feedback');
+            feedback.classList.remove('hidden', 'bg-red-950/40', 'text-red-300', 'bg-emerald-950/40', 'text-emerald-300');
+
+            if (choice === 2) {
+                feedback.className += ' bg-emerald-950/40 text-emerald-300 p-3 rounded-lg text-xs';
+                feedback.innerHTML = `🌟 <b>נכון מאוד!</b> שימוש ב-VLAN מאפשר לנו לקבוע חוקים בצורה וירטואלית, ללא שום צורך לקנות חומרה פיזית יקרה נוספת או לשנות כבלים בקירות. זהו הפתרון התעשייתי המנצח והזול ביותר!`;
+                addXP(25);
+                addLog("מענה נכון על תרחיש פריצת סודות שכר.");
+            } else {
+                feedback.className += ' bg-red-950/40 text-red-300 p-3 rounded-lg text-xs';
+                feedback.innerHTML = `❌ <b>בחירה פחות יעילה.</b> קניית מתגים וכבלים נפרדים היא יקרה מאוד ומסובכת לתחזוקה פיזית. מנהלי רשתות מעדיפים להשתמש ב-VLAN-ים וירטואליים על גבי אותה תשתית קיימת!`;
+                addXP(5);
+            }
+        }
+
+        // STEP 3: Switch Simulator Painting Logic
+        function setActiveVlanConfig(colorId) {
+            activeVlanColor = colorId;
+            
+            // Highlight active legend item
+            const v10 = document.getElementById('pal-vlan10');
+            const v20 = document.getElementById('pal-vlan20');
+            const v30 = document.getElementById('pal-vlan30');
+
+            v10.className = "px-3 py-1.5 rounded text-xs font-bold border border-slate-700 bg-slate-800 text-slate-400 flex items-center gap-1.5 transition-all";
+            v20.className = "px-3 py-1.5 rounded text-xs font-bold border border-slate-700 bg-slate-800 text-slate-400 flex items-center gap-1.5 transition-all";
+            v30.className = "px-3 py-1.5 rounded text-xs font-bold border border-slate-700 bg-slate-800 text-slate-400 flex items-center gap-1.5 transition-all";
+
+            const activeBtn = document.getElementById(`pal-${colorId}`);
+            if (colorId === 'vlan10') {
+                activeBtn.className = "px-3 py-1.5 rounded text-xs font-bold border border-pink-500/50 bg-pink-950/40 text-pink-300 flex items-center gap-1.5 transition-all";
+            } else if (colorId === 'vlan20') {
+                activeBtn.className = "px-3 py-1.5 rounded text-xs font-bold border border-cyan-500/50 bg-cyan-950/40 text-cyan-300 flex items-center gap-1.5 transition-all";
+            } else if (colorId === 'vlan30') {
+                activeBtn.className = "px-3 py-1.5 rounded text-xs font-bold border border-yellow-500/50 bg-yellow-950/40 text-yellow-300 flex items-center gap-1.5 transition-all";
+            }
+            
+            addLog(`צבע צביעה נבחר: ${colorId.toUpperCase()}`);
+        }
+
+        function assignPortVlan(portNum) {
+            const led = document.getElementById(`port-led-${portNum}`);
+            const lbl = document.getElementById(`port-lbl-${portNum}`);
+
+            if (activeVlanColor === 'vlan10') {
+                portAssignments[portNum] = 'vlan10';
+                led.className = "w-3 h-3 rounded bg-pink-500 shadow-md shadow-pink-500/50";
+                lbl.innerText = "V10";
+                lbl.className = "text-[9px] text-pink-400 font-mono font-bold";
+            } else if (activeVlanColor === 'vlan20') {
+                portAssignments[portNum] = 'vlan20';
+                led.className = "w-3 h-3 rounded bg-cyan-400 shadow-md shadow-cyan-400/50";
+                lbl.innerText = "V20";
+                lbl.className = "text-[9px] text-cyan-400 font-mono font-bold";
+            } else if (activeVlanColor === 'vlan30') {
+                portAssignments[portNum] = 'vlan30';
+                led.className = "w-3 h-3 rounded bg-yellow-500 shadow-md shadow-yellow-500/50";
+                lbl.innerText = "V30";
+                lbl.className = "text-[9px] text-yellow-500 font-mono font-bold";
+            }
+
+            addLog(`פורט FastEthernet 0/${portNum} שוייך ל-${lbl.innerText}`);
+        }
+
+        function triggerVlanTest() {
+            addLog("יוזם שידור Broadcast מפורט 1 (VLAN HR)...");
+
+            const feedback = document.getElementById('sim-feedback');
+            feedback.classList.remove('hidden', 'bg-red-950/40', 'text-red-300', 'bg-emerald-950/40', 'text-emerald-300');
+
+            // Verification Check:
+            // HR ports (1 & 2) should be vlan10
+            // R&D ports (3 & 4) should be vlan20
+            // Guest ports (5 & 6) should be vlan30
+            const isHrOk = (portAssignments[1] === 'vlan10' && portAssignments[2] === 'vlan10');
+            const isRdOk = (portAssignments[3] === 'vlan20' && portAssignments[4] === 'vlan20');
+            const isGuestOk = (portAssignments[5] === 'vlan30' && portAssignments[6] === 'vlan30');
+
+            if (isHrOk && isRdOk && isGuestOk) {
+                feedback.className += ' bg-emerald-950/40 text-emerald-300';
+                feedback.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span class="text-xl">🌟</span>
+                        <div>
+                            <p class="font-bold">בדיקת דומיין שידור: הצלחה מוחלטת!</p>
+                            <p class="text-[11px] opacity-90">שידור Broadcast מפורט 1 (HR) הגיע אך ורק לפורט 2 (HR). הוא נחסם לחלוטין מלהגיע למחשבי הפיתוח (Ports 3/4) או האורחים (Ports 5/6). מעכשיו, שיחות השכר של משאבי אנוש בטוחות לחלוטין!</p>
+                        </div>
+                    </div>
+                `;
+                if (!hasPassedSim) {
+                    addXP(50);
+                    hasPassedSim = true;
+                }
+                document.getElementById('btn-to-step-4').disabled = false;
+                addLog("בדיקת דומיינים ו-VLAN עברה בהצלחה מלאה.");
+            } else {
+                feedback.className += ' bg-red-950/40 text-red-300';
+                feedback.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <span>❌</span>
+                        <div>
+                            <p class="font-bold">נכשלה בדיקת הבידוד! דליפת מידע זוהתה ברשת.</p>
+                            <p class="text-[11px] opacity-90">שיוך הפורטים שגוי. ודא כי: <br>
+                            - פורטים 1 ו-2 מוגדרים על <b>V10</b> (HR)<br>
+                            - פורטים 3 ו-4 מוגדרים על <b>V20</b> (R&D)<br>
+                            - פורטים 5 ו-6 מוגדרים על <b>V30</b> (Guest)</p>
+                        </div>
+                    </div>
+                `;
+                addLog("נכשלה בדיקת ה-VLAN: לא בוצעה הפרדה מלאה של דומייני שידור.");
+            }
+        }
+
+        // STEP 4: Prompt Engineering Core Simulator Logic
+        function updatePromptPreview() {
+            const scale = document.getElementById('prompt-scale').value;
+            const constraints = document.getElementById('prompt-constraints').value;
+            const ip = document.getElementById('prompt-ip').value;
+            const preview = document.getElementById('prompt-preview');
+
+            if (scale === 'none' && constraints === 'none' && ip === 'none') {
+                preview.innerText = "בחר מרכיבים משמאל כדי לבנות פרומפט רשתות מקצועי...";
+                return;
+            }
+
+            let scaleStr = scale === 'none' ? "[בחר היקף]" : getScaleText(scale);
+            let constraintsStr = constraints === 'none' ? "[בחר אבטחה]" : getConstraintsText(constraints);
+            let ipStr = ip === 'none' ? "[בחר אסטרטגיה]" : getIpText(ip);
+
+            preview.innerText = `הנחיית עיצוב רשת:
+אנא תכנן מערך VLANs עבור קמפוס מסוג: ${scaleStr}.
+דרישת אבטחה מרכזית: ${constraintsStr}.
+שיטת הקצאת כתובות IP נדרשת: ${ipStr}.`;
+        }
+
+        function getScaleText(val) {
+            if (val === 'school') return "בית ספר תיכון מרובה מבנים עם 1,000 תלמידים ומורים";
+            if (val === 'office') return "משרד הייטק המשתרע על 3 קומות";
+            return "מרכז רפואי רגיש המפריד בין ציוד קריטי לרשתות ציבוריות";
+        }
+
+        function getConstraintsText(val) {
+            if (val === 'isolate') return "בידוד לוגי הדוק ומניעת מעבר חבילות ברמת שכבה 2 ו-3";
+            if (val === 'moderate') return "גישה מבוקרת ומוגבלת לשרתים פנימיים בלבד באמצעות ACLs";
+            return "תנועת מידע פתוחה ללא חסימות לטובת גמישות עבודה מוגברת";
+        }
+
+        function getIpText(val) {
+            if (val === 'subnet') return "חלוקת Subnetting מוגדרת לכל VLAN בנפרד (כגון 192.168.x.0/24)";
+            return "רשת IP שטוחה יחידה (Flat Network) עבור כלל הרכיבים";
+        }
+
+        function runVlanPromptSimulator() {
+            const scale = document.getElementById('prompt-scale').value;
+            const constraints = document.getElementById('prompt-constraints').value;
+            const ip = document.getElementById('prompt-ip').value;
+            const responseBox = document.getElementById('ai-response-box');
+            const scoreTag = document.getElementById('prompt-score-tag');
+
+            if (scale === 'none' || constraints === 'none' || ip === 'none') {
+                responseBox.innerHTML = "<p class='text-red-400 font-bold'>⚠️ שגיאה: עליך לבחור את כל שלושת מרכיבי הפרומפט כדי שהמעבד יוכל לתכנן את הרשת!</p>";
+                return;
+            }
+
+            addLog("מעביר פרומפט למנוע החילול הסימולטיבי...");
+            responseBox.innerHTML = "<p class='text-slate-500 italic animate-pulse'>ה-AI מחשב תוכנית VLANים, חומות אש וכתובות IP...</p>";
+
+            setTimeout(() => {
+                scoreTag.classList.remove('hidden', 'bg-red-950', 'text-red-400', 'bg-emerald-950', 'text-emerald-400');
+                scoreTag.className += ' bg-emerald-950 text-emerald-400';
+                scoreTag.innerText = "ציון פרומפט: 100% מעולה!";
+
+                let content = "";
+
+                if (scale === 'school') {
+                    content = `
+                        <h4 class="font-bold text-pink-400 mb-2">תוכנית VLAN עבור מוסד חינוכי קמפוס:</h4>
+                        <p class="mb-2"><b>VLAN 10 - מנהלה ומורים:</b> IP: 192.168.10.0/24. גישה חופשית למערכות ציונים ומזכירות.</p>
+                        <p class="mb-2"><b>VLAN 20 - תלמידים ומעבדות מחשבים:</b> IP: 192.168.20.0/24. חסימה מלאה מגישה ל-VLAN 10.</p>
+                        <p class="mb-2"><b>VLAN 30 - אורחים (Guest WiFi):</b> IP: 192.168.30.0/24. רשת מבודדת המאפשרת גישת אינטרנט בלבד ללא גישה פנימית כלל.</p>
+                        <p class="text-[11px] text-slate-400 border-t border-slate-800 pt-2"><b>מגבלת אבטחה מיושמת:</b> ${getConstraintsText(constraints)}</p>
+                    `;
+                } else if (scale === 'office') {
+                    content = `
+                        <h4 class="font-bold text-pink-400 mb-2">ארכיטקטורת רשת VLAN למשרדי הייטק:</h4>
+                        <p class="mb-2"><b>VLAN 100 - הנהלה וכספים (HR/Finance):</b> IP: 10.0.100.0/24. רשת רגישה ביותר לניהול כספים.</p>
+                        <p class="mb-2"><b>VLAN 200 - פיתוח (R&D / Dev):</b> IP: 10.0.200.0/24. גישה מיועדת לשרתי גיט ושרתים פנימיים.</p>
+                        <p class="mb-2"><b>VLAN 300 - שרתי ייצור (Production):</b> IP: 10.0.300.0/24. שרתים ארגוניים מבוקרי גישה.</p>
+                        <p class="text-[11px] text-slate-400 border-t border-slate-800 pt-2"><b>שיטת IP מיושמת:</b> ${getIpText(ip)}</p>
+                    `;
+                } else {
+                    content = `
+                        <h4 class="font-bold text-pink-400 mb-2">רשת רפואית קריטית (Medical Secure LAN):</h4>
+                        <p class="mb-2"><b>VLAN 50 - מכשירי הנשמה וניטור חולים:</b> IP: 172.16.50.0/24. בידוד לוגי הדוק למניעת סכנת חיים.</p>
+                        <p class="mb-2"><b>VLAN 60 - רשת רופאים ואחיות (EMR Access):</b> IP: 172.16.60.0/24. גישה מאובטחת לרשומות רפואיות.</p>
+                        <p class="mb-2"><b>VLAN 70 - אורחים ומבקרים:</b> IP: 172.16.70.0/24. רשת ציבורית זמנית ללא מגע ברשתות הקליניות.</p>
+                    `;
+                }
+
+                responseBox.innerHTML = content;
+
+                if (!hasPassedPrompt) {
+                    hasPassedPrompt = true;
+                    addXP(80);
+                    document.getElementById('prompt-achievement').classList.remove('hidden');
+                    document.getElementById('btn-to-step-5').disabled = false;
+                    addLog("משימת כתיבת פרומפט ארכיטקטורת VLAN הושלמה בהצלחה מרובה!");
+                }
+
+            }, 1300);
+        }
+
+        // Copy Share Code
+        function copyShareCode() {
+            const code = document.getElementById('share-code').innerText;
+            const tempInput = document.createElement("input");
+            tempInput.value = code;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+
+            showToast("קוד ההישג הועתק בהצלחה! שלח לחבר.");
+            addLog("קוד שיתוף הועתק ללוח.");
+        }
+
+        // Export Report to Teacher
+        function exportTeacherReport() {
+            const q1 = document.getElementById('reflection-q1').value;
+            const q2 = document.getElementById('reflection-q2').value;
+            
+            if (!q1 || !q2) {
+                alert("נא למלא את שתי שאלות הרפלקציה לפני שמייצאים דוח למורה!");
+                return;
+            }
+
+            const reportText = `
+=============================================
+דוח מסכם - שיעור 4: VLAN-ים וחלוקת רשתות
+=============================================
+שם התלמיד: [נא להקליד שם מלא כאן]
+דירוג XP סופי: ${xp} XP
+דרגה נוכחית: ${currentLevel}
+
+תשובות לרפלקציה:
+---------------------------------------------
+1. מהו היתרון המרכזי של שימוש ב-VLAN מבחינת ניצול חומרה ועלויות?
+תשובה: ${q1}
+
+2. מדוע תעבורה בין שני VLAN-ים שונים חייבת לעבור דרך ראוטר (שכבה 3)?
+תשובה: ${q2}
+
+---------------------------------------------
+מיוצר עבור מורה תקשורת ורשתות - NET_ACADEMY
+=============================================
+            `;
+
+            const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `NET_ACADEMY_Lesson4_Report.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast("דוח פעילות הורד! העבר אותו למורה שלך.");
+            addLog("דוח פעילות הופק והורד למחשב המשתמש.");
+        }
+    </script>
+
+    <!-- Floating Help Bot Widget -->
+    <div id="bot-panel" dir="rtl">
+        <div class="bg-slate-900 rounded-2xl shadow-2xl border border-pink-500/40 overflow-hidden backdrop-blur-xl">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-600 p-4 text-white flex items-center justify-between border-b border-pink-400/20">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-slate-950/40 border border-white/20 flex items-center justify-center shadow-inner overflow-hidden p-0.5">
+                        <!-- Custom Bot Avatar Image -->
+                        <img src="https://lh3.googleusercontent.com/d/1fzqv93VKIW_VT8-e1HdJxBmbU2sFnwlb" alt="Bot Avatar" class="w-full h-full object-cover rounded-full" />
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm tracking-wide leading-tight">עוזר הרשתות האישי</h4>
+                        <span class="text-[10px] text-pink-200 flex items-center gap-1 opacity-90">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            זמין 24/7 לסיוע
+                        </span>
+                    </div>
+                </div>
+                <button onclick="toggleBotPanel()" class="w-7 h-7 rounded-lg bg-black/20 hover:bg-black/40 text-pink-100 flex items-center justify-center transition-colors text-lg font-bold">&times;</button>
+            </div>
+            
+            <!-- Body -->
+            <div class="p-5 flex flex-col gap-4 bg-slate-950/80">
+                <div class="flex items-start gap-3 bg-slate-900/90 p-3.5 rounded-xl border border-slate-800">
+                    <span class="text-xl">💬</span>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        תקוע בסימולטור ה-VLAN? רוצה להתייעץ על הגדרות רשת? הבוט החכם זמין לעזור לך בכל רגע!
+                    </p>
+                </div>
+                
+                <a href="https://gemini.google.com/gem/13FFjtbW5S3yg0EE1qBEQiP8GEMwoepKu?usp=sharing" target="_blank" rel="noopener noreferrer" class="group relative overflow-hidden flex items-center justify-center gap-2 bg-gradient-to-r from-pink-600 via-fuchsia-600 to-purple-600 text-white font-bold py-3 px-4 rounded-xl text-xs transition-all duration-300 hover:shadow-lg hover:shadow-pink-500/30 active:scale-95">
+                    <span>פתיחת הבוט בחלון חדש</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 transition-transform group-hover:-translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trigger Button -->
+    <button id="bot-fab" onclick="toggleBotPanel()" aria-label="פתיחת בוט עזרה">
+        <span class="bot-ping"></span>
+        <img src="https://lh3.googleusercontent.com/d/1fzqv93VKIW_VT8-e1HdJxBmbU2sFnwlb" alt="Bot Avatar" class="w-full h-full object-cover rounded-full" />
+    </button>
+
+    <script>
+        function toggleBotPanel() {
+            document.getElementById('bot-panel').classList.toggle('open');
+        }
+    </script>
+</body>
+</html>
