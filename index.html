@@ -509,8 +509,8 @@
                                 <label class="block text-xs text-pink-600 font-bold mb-1">3. הגדרת אסטרטגיית חלוקת <span dir="ltr">IP</span>:</label>
                                 <select id="prompt-ip" onchange="updatePromptPreview()" class="w-full bg-amber-50 text-xs text-slate-800 p-2.5 rounded border border-amber-300 focus:outline-none focus:border-pink-500">
                                     <option value="none">-- בחר שיטת חלוקת IP --</option>
-                                    <option value="subnet">חלוקה לכתובות IP מסוג Subnets (למשל 192.168.10.0 לכל VLAN)</option>
-                                    <option value="flat">כתובת IP שטוחה ויחידה לכולם (ללא סאבנטים נפרדים)</option>
+                                    <option value="subnet">חלוקה לכתובות <span dir="ltr">IP</span> מסוג <span dir="ltr">Subnets</span> (למשל <span dir="ltr">192.168.10.0</span> לכל <span dir="ltr">VLAN</span>)</option>
+                                    <option value="flat">כתובת <span dir="ltr">IP</span> שטוחה ויחידה לכולם (ללא סאבנטים נפרדים)</option>
                                 </select>
                             </div>
 
@@ -571,6 +571,25 @@
                     <span class="text-pink-600 text-xs font-bold uppercase tracking-wider">משוב עמיתים וסגירת דוח</span>
                     <h2 class="text-2xl font-black text-slate-900 mt-2 mb-4">תעודת מעצב הרשתות הלוגיות שלך מוכנה!</h2>
                     
+                    <!-- לחצן VLAN מתקדם בולט ומעוצב -->
+                    <div class="mb-6 bg-gradient-to-r from-pink-500 via-purple-600 to-indigo-600 p-0.5 rounded-2xl shadow-lg hover:shadow-xl transition-all">
+                        <div class="bg-white/95 backdrop-blur-sm p-4 rounded-[14px] flex flex-col sm:flex-row items-center justify-between gap-4">
+                            <div class="flex items-center gap-3 text-right">
+                                <div class="w-10 h-10 rounded-xl bg-pink-100 text-pink-600 flex items-center justify-center shrink-0">
+                                    <i data-lucide="network" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-900 text-sm">מוכן לשלב הבא ברשתות?</h4>
+                                    <p class="text-xs text-slate-600">עבור למעבדה המתקדמת לתרגול הגדרות עמוקות וסביבת תרגול אינטראקטיבית</p>
+                                </div>
+                            </div>
+                            <a href="https://saharhakimi-lab.github.io/vlan2/" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white font-black px-6 py-3 rounded-xl text-sm transition-all transform hover:-translate-y-0.5 shadow-md shrink-0">
+                                <span><span dir="ltr">VLAN</span> מתקדם</span>
+                                <i data-lucide="external-link" class="w-4 h-4"></i>
+                            </a>
+                        </div>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <!-- Reflection Form -->
                         <div class="bg-white p-5 rounded-xl border border-amber-200 space-y-4 shadow-sm">
@@ -940,10 +959,10 @@
             let constraintsStr = constraints === 'none' ? "[בחר אבטחה]" : getConstraintsText(constraints);
             let ipStr = ip === 'none' ? "[בחר אסטרטגיה]" : getIpText(ip);
 
-            preview.innerText = `הנחיית עיצוב רשת:
-אנא תכנן מערך VLANs עבור קמפוס מסוג: ${scaleStr}.
+            preview.innerHTML = `הנחיית עיצוב רשת:
+אנא תכנן מערך <span dir="ltr">VLAN</span>-ים עבור קמפוס מסוג: ${scaleStr}.
 דרישת אבטחה מרכזית: ${constraintsStr}.
-שיטת הקצאת כתובות IP נדרשת: ${ipStr}.`;
+שיטת הקצאת כתובות <span dir="ltr">IP</span> נדרשת: ${ipStr}.`;
         }
 
         function getScaleText(val) {
@@ -953,14 +972,14 @@
         }
 
         function getConstraintsText(val) {
-            if (val === 'isolate') return "בידוד לוגי הדוק ומניעת מעבר חבילות ברמת שכבה 2 ו-3";
-            if (val === 'moderate') return "גישה מבוקרת ומוגבלת לשרתים פנימיים בלבד באמצעות ACLs";
+            if (val === 'isolate') return `בידוד לוגי הדוק ומניעת מעבר חבילות ברמת שכבה 2 ו-3`;
+            if (val === 'moderate') return `גישה מבוקרת ומוגבלת לשרתים פנימיים בלבד באמצעות <span dir="ltr">ACL</span>-ים`;
             return "תנועת מידע פתוחה ללא חסימות לטובת גמישות עבודה מוגברת";
         }
 
         function getIpText(val) {
-            if (val === 'subnet') return "חלוקת Subnetting מוגדרת לכל VLAN בנפרד (כגון 192.168.x.0/24)";
-            return "רשת IP שטוחה יחידה (Flat Network) עבור כלל הרכיבים";
+            if (val === 'subnet') return `חלוקת <span dir="ltr">Subnetting</span> מוגדרת לכל <span dir="ltr">VLAN</span> בנפרד (כגון <span dir="ltr">192.168.x.0/24</span>)`;
+            return `רשת <span dir="ltr">IP</span> שטוחה יחידה (<span dir="ltr">Flat Network</span>) עבור כלל הרכיבים`;
         }
 
         function runVlanPromptSimulator() {
@@ -976,7 +995,7 @@
             }
 
             addLog("Sending prompt to generative network engine...");
-            responseBox.innerHTML = "<p class='text-slate-500 italic animate-pulse'>ה-AI מחשב תוכנית VLANים, חומות אש וכתובות IP...</p>";
+            responseBox.innerHTML = `<p class='text-slate-500 italic animate-pulse'>ה-<span dir="ltr">AI</span> מחשב תוכנית <span dir="ltr">VLAN</span>-ים, חומות אש וכתובות <span dir="ltr">IP</span>...</p>`;
 
             setTimeout(() => {
                 scoreTag.classList.remove('hidden', 'bg-red-100', 'text-red-800', 'bg-emerald-100', 'text-emerald-800');
@@ -999,7 +1018,7 @@
                         <p class="mb-2"><b><span dir="ltr">VLAN 100</span> - הנהלה וכספים (<span dir="ltr">HR/Finance</span>):</b> <span dir="ltr">IP: 10.0.100.0/24</span>. רשת רגישה ביותר לניהול כספים.</p>
                         <p class="mb-2"><b><span dir="ltr">VLAN 200</span> - פיתוח (<span dir="ltr">R&D / Dev</span>):</b> <span dir="ltr">IP: 10.0.200.0/24</span>. גישה מיועדת לשרתי גיט ושרתים פנימיים.</p>
                         <p class="mb-2"><b><span dir="ltr">VLAN 300</span> - שרתי ייצור (<span dir="ltr">Production</span>):</b> <span dir="ltr">IP: 10.0.300.0/24</span>. שרתים ארגוניים מבוקרי גישה.</p>
-                        <p class="text-[11px] text-slate-500 border-t border-amber-200 pt-2"><b>שיטת IP מיושמת:</b> ${getIpText(ip)}</p>
+                        <p class="text-[11px] text-slate-500 border-t border-amber-200 pt-2"><b>שיטת <span dir="ltr">IP</span> מיושמת:</b> ${getIpText(ip)}</p>
                     `;
                 } else {
                     content = `
@@ -1070,12 +1089,12 @@
 
             const blob = new Blob([reportText], { type: 'text/plain;charset=utf-8' });
             const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `Sahar_Academy_Lesson4_Report.txt`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const linkEl = document.createElement('a');
+            linkEl.href = url;
+            linkEl.download = `Sahar_Academy_Lesson4_Report.txt`;
+            document.body.appendChild(linkEl);
+            linkEl.click();
+            document.body.removeChild(linkEl);
             
             showToast("דוח פעילות הורד! העבר אותו למורה שלך.");
             addLog("Summary report generated and downloaded.");
