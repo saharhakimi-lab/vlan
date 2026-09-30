@@ -220,7 +220,7 @@
                     <button id="btn-step-2" onclick="switchStep(2)" class="w-full text-right flex items-center justify-between p-3 rounded-lg bg-amber-100/30 border border-amber-200/60 text-slate-600 hover:bg-amber-100 hover:text-slate-900 transition-all">
                         <div class="flex items-center gap-3">
                             <span class="code-font text-xs opacity-60" dir="ltr">02.</span>
-                            <span>איך <span class="term-badge" dir="ltr">VLAN</span> עובד? (<span class="term-badge" dir="ltr">Tagging</span>)</span>
+                            <span>איך <span class="term-badge" dir="ltr">VLAN</span> עובד? <span class="term-badge" dir="ltr">Tagging</span></span>
                         </div>
                         <i data-lucide="tag" class="w-4 h-4 opacity-50"></i>
                     </button>
@@ -431,7 +431,7 @@
                         <!-- הבלטת התגית, מזהה VLAN, סינון והסרת התגית - פונטים מוגדלים ב-50% -->
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-sm pt-4 border-t border-amber-200">
                             <div class="text-right space-y-1">
-                                <span class="block text-pink-600 font-bold text-base">1. הבלטת התגית (<span class="term-badge-pink" dir="ltr">Tagging</span>):</span>
+                                <span class="block text-pink-600 font-bold text-base">1. הבלטת התגית <span class="term-badge-pink" dir="ltr">Tagging</span>:</span>
                                 <p class="text-slate-600 leading-relaxed">
                                     המתג מוסיף תגית בגודל <b>4 בייטים</b> ישירות לתוך פריים ה-<span class="term-badge" dir="ltr">Ethernet</span> המקורי. התגית כוללת את ה-<span class="term-badge" dir="ltr">TPID</span> (מזהה פרוטוקול <span class="term-badge" dir="ltr">0x8100</span>) ורכיב <span class="term-badge" dir="ltr">TCI</span> המכיל את ה-<span class="term-badge-pink" dir="ltr">VLAN ID</span>.
                                 </p>
@@ -626,7 +626,7 @@
                             
                             <!-- Block 1: Scenario Scale -->
                             <div>
-                                <label class="block text-sm text-pink-600 font-bold mb-1">1. הגדר את היקף המוסד (<span class="term-badge-pink" dir="ltr">Scale</span>):</label>
+                                <label class="block text-sm text-pink-600 font-bold mb-1">1. הגדר את היקף המוסד <span class="term-badge-pink" dir="ltr"></span>:</label>
                                 <select id="prompt-scale" onchange="updatePromptPreview()" class="w-full bg-amber-50 text-sm text-slate-800 p-2.5 rounded border border-amber-300 focus:outline-none focus:border-pink-500">
                                     <option value="none">-- בחר היקף קמפוס --</option>
                                     <option value="school">בית ספר עם 4 בניינים, 1,000 תלמידים ורשת אורחים חופשית</option>
@@ -637,7 +637,7 @@
 
                             <!-- Block 2: Security Constraints -->
                             <div>
-                                <label class="block text-sm text-pink-600 font-bold mb-1">2. הגדר מגבלות אבטחה (<span class="term-badge-pink" dir="ltr">Constraints</span>):</label>
+                                <label class="block text-sm text-pink-600 font-bold mb-1">2. הגדר מגבלות אבטחה (<span class="term-badge-pink" dir="ltr"></span>):</label>
                                 <select id="prompt-constraints" onchange="updatePromptPreview()" class="w-full bg-amber-50 text-sm text-slate-800 p-2.5 rounded border border-amber-300 focus:outline-none focus:border-pink-500">
                                     <option value="none">-- בחר מגבלת אבטחה --</option>
                                     <option value="isolate">חסימת תקשורת מוחלטת בין רשת הסטודנטים/אורחים לרשת המנהלה</option>
