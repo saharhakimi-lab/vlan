@@ -452,14 +452,26 @@
                         </p>
 
                         <div style="background: var(--bg); border: 2px solid var(--line); padding: 18px; border-radius: 16px; margin-bottom: 20px;">
-                            <h4 style="text-align: center; margin-bottom: 12px; font-size: 0.9rem;">מבנה פריים <span class="eng-tag">Ethernet</span> עם תגית <span class="eng-tag">VLAN</span> פרוטוקול <span class="eng-tag">802.1Q</span></h4>
-                            <div style="overflow-x: auto; padding-bottom: 10px;">
-                                <div style="display: flex; gap: 8px; font-family: var(--font-code); font-size: 0.75rem; min-width: 600px; justify-content: center; direction: ltr;">
-                                    <span style="background: var(--paper); border: 1.5px solid var(--line); padding: 8px; border-radius: 8px; text-align: center;">Destination MAC<br><small style="color:var(--muted)">6 Bytes</small></span>
-                                    <span style="background: var(--paper); border: 1.5px solid var(--line); padding: 8px; border-radius: 8px; text-align: center;">Source MAC<br><small style="color:var(--muted)">6 Bytes</small></span>
-                                    <span style="background: var(--c-violet-bg); border: 2px solid var(--c-violet); color: var(--c-violet); padding: 8px; border-radius: 8px; text-align: center; font-weight: 800;">VLAN TAG 802.1Q<br><small>4 Bytes</small></span>
-                                    <span style="background: var(--paper); border: 1.5px solid var(--line); padding: 8px; border-radius: 8px; text-align: center;">EtherType<br><small style="color:var(--muted)">2 Bytes</small></span>
-                                    <span style="background: var(--paper); border: 1.5px solid var(--line); padding: 8px; border-radius: 8px; text-align: center; flex-grow: 1;">Data / Payload<br><small style="color:var(--muted)">46-1500 Bytes</small></span>
+                            <h4 style="text-align: center; margin-bottom: 14px; font-size: 0.95rem;">מבנה פריים <span class="eng-tag">Ethernet</span> שלם עם תגית <span class="eng-tag">802.1Q</span> משולבת</h4>
+                            
+                            <!-- מסגרת פריים אחידה (Frame Structure Container) -->
+                            <div style="background: var(--paper); border: 3px solid var(--term); border-radius: 14px; padding: 12px; box-shadow: var(--shadow); overflow-x: auto; direction: ltr; margin-bottom: 16px;">
+                                <div style="display: flex; gap: 4px; font-family: var(--font-code); font-size: 0.75rem; min-width: 680px; align-items: stretch; text-align: center;">
+                                    <div style="background: var(--bg); border: 2px solid var(--line); padding: 10px 6px; border-radius: 8px; flex: 1.2;">
+                                        <b>Dest MAC</b><br><small style="color:var(--muted)">6 Bytes</small>
+                                    </div>
+                                    <div style="background: var(--bg); border: 2px solid var(--line); padding: 10px 6px; border-radius: 8px; flex: 1.2;">
+                                        <b>Source MAC</b><br><small style="color:var(--muted)">6 Bytes</small>
+                                    </div>
+                                    <div style="background: var(--c-violet-bg); border: 2.5px solid var(--c-violet); color: var(--c-violet); padding: 10px 6px; border-radius: 8px; flex: 1.5; font-weight: 850;">
+                                        <b>VLAN TAG</b><br><small>802.1Q (4 Bytes)</small>
+                                    </div>
+                                    <div style="background: var(--bg); border: 2px solid var(--line); padding: 10px 6px; border-radius: 8px; flex: 1;">
+                                        <b>EtherType</b><br><small style="color:var(--muted)">2 Bytes</small>
+                                    </div>
+                                    <div style="background: var(--term-soft); border: 2px dashed var(--term); color: var(--term); padding: 10px 6px; border-radius: 8px; flex: 2.5;">
+                                        <b>Data / Payload</b><br><small>46-1500 Bytes</small>
+                                    </div>
                                 </div>
                             </div>
 
@@ -598,7 +610,7 @@
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; background: var(--bg); border: 2px solid var(--line); padding: 14px; border-radius: 14px; flex-wrap: wrap; gap: 10px;">
                             <div>
                                 <b>הרצי בדיקת דומיין שידור:</b>
-                                <p style="font-size: 0.8rem; color: var(--muted);">שגר שידור Broadcast מפורט 1 HR ובדוק האם הוא מגיע לעמדות הפיתוח או האורחים.</p>
+                                <p style="font-size: 0.8rem; color: var(--muted);">שגר שידור Broadcast מפורט 1 HR ובדוק האם הוא מגיע אך ורק לעמדות השייכות לאותו ה-VLAN ונחסם מהאחרות.</p>
                             </div>
                             <button onclick="triggerVlanTest()" class="action-btn">שגר שידור Broadcast</button>
                         </div>
@@ -859,18 +871,25 @@
             const feedback = document.getElementById('sim-feedback');
             feedback.style.display = 'block';
 
-            const isHrOk = (portAssignments[1] === 'vlan10' && portAssignments[2] === 'vlan10');
-            const isRdOk = (portAssignments[3] === 'vlan20' && portAssignments[4] === 'vlan20');
-            const isGuestOk = (portAssignments[5] === 'vlan30' && portAssignments[6] === 'vlan30');
+            // בדיקת דומיין שידור לוגי גמיש ונכון פדגוגית:
+            // מוודאים שכל פורט משויך לאיזשהו VLAN, ושפורטים 1-2 באותו VLAN (HR), פורטים 3-4 באותו VLAN (R&D), ופורטים 5-6 באותו VLAN (Guest) בלי תלות בסדר צבע ספציפי
+            const p1 = portAssignments[1], p2 = portAssignments[2];
+            const p3 = portAssignments[3], p4 = portAssignments[4];
+            const p5 = portAssignments[5], p6 = portAssignments[6];
 
-            if (isHrOk && isRdOk && isGuestOk) {
+            const allAssigned = Object.values(portAssignments).every(v => v !== 'none');
+            const hrValid = (p1 === p2) && (p1 !== 'none');
+            const rdValid = (p3 === p4) && (p3 !== 'none') && (p3 !== p1);
+            const guestValid = (p5 === p6) && (p5 !== 'none') && (p5 !== p1) && (p5 !== p3);
+
+            if (allAssigned && hrValid && rdValid && guestValid) {
                 feedback.style.background = '#d8f3e6'; feedback.style.color = '#0b6b4a';
-                feedback.innerHTML = '<b>בדיקת דומיין שידור: הצלחה מוחלטת!</b> השידור הגיע אך ורק לפורט המורשה ונחסם לחלוטין מלהגיע לשאר העמדות.';
+                feedback.innerHTML = '<b>בדיקת דומיין שידור: הצלחה מוחלטת!</b> הגדרת בהצלחה את חומות ההפרדה: השידור הגיע אך ורק לעמדות שבתוך אותו דומיין שידור לוגי (VLAN) ונחסם כראוי מלהגיע למחלקות האחרות.';
                 if (!hasPassedSim) { addXP(50); hasPassedSim = true; }
                 document.getElementById('btn-to-step-4').disabled = false;
             } else {
                 feedback.style.background = '#fcdcd6'; feedback.style.color = '#a11a1a';
-                feedback.innerHTML = '<b>נכשלה בדיקת הבידוד!</b> ודא כי פורטים 1-2 על V10, פורטים 3-4 על V20 ופורטים 5-6 על V30.';
+                feedback.innerHTML = '<b>נכשלה בדיקת הבידוד!</b> ודא שכל הפורטים שוייכו, ושכל מחלקה (פורטים 1-2, פורטים 3-4, פורטים 5-6) מוגדרת תחת רשת (VLAN) נפרדת ומבודדת מהאחרות.';
             }
         }
 
