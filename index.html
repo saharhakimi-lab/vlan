@@ -201,6 +201,7 @@
             align-items: center; justify-content: center; gap: 8px; text-decoration: none;
         }
         .action-btn:hover { background: #991b1b; transform: translateY(-1px); }
+        .action-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         .action-btn.btn-sec { background: var(--paper); color: var(--ink); border: 2px solid var(--line); }
         .action-btn.btn-sec:hover { border-color: var(--red); }
         .action-btn.btn-violet { background: var(--c-violet); color: #fff; }
@@ -216,7 +217,7 @@
             border-color: var(--red); background: var(--paper); color: var(--red-text);
         }
 
-        /* ---------- רכיבי סימולטור ---------- */
+        /* ---------- רכיבי סימולטור שלב 3 ---------- */
         .sim-step { display:flex; align-items:center; gap:10px; background:var(--bg); border:2px solid var(--line); border-radius:14px; padding:10px 14px; font-weight:700; color:var(--ink); font-size:0.8rem; flex:1 1 200px; }
         .sim-step b { flex:0 0 28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:0.8rem; }
 
@@ -265,6 +266,66 @@
 
         .sim-progress { height:10px; background:var(--bg); border-radius:9999px; overflow:hidden; border:1px solid var(--line); }
         .sim-progress > div { height:100%; width:0; background:var(--red); border-radius:9999px; transition:width .4s ease; }
+
+        /* ---------- סגנונות מבודדים לסימולטור Catalyst 2960 (שלב 5) ---------- */
+        #step-5 {
+            --c29-panel: var(--bg);
+            --c29-ink: var(--ink);
+            --c29-mute: var(--muted);
+            --c29-line: var(--line);
+            --c29-face: #2b3a47;
+            --c29-faceink: #e8eef3;
+            --c29-v1: #8a97a3;
+            --c29-v20: #1f6fe0;
+            --c29-v30: #1a9a63;
+            --c29-vx: #8a4fd6;
+            --c29-trk: #e59a0c;
+            --c29-focus: #d6336c;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        #step-5 .lead { margin: 0 0 12px; color: var(--c29-mute); font-size: 0.95rem; }
+        #step-5 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; }
+        #step-5 .chip { display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--c29-line); background: var(--c29-panel); color: var(--c29-ink); border-radius: 999px; padding: 4px 12px; font-size: 0.85rem; cursor: pointer; }
+        #step-5 .chip[aria-pressed="true"] { border-color: var(--c29-ink); font-weight: 700; }
+        #step-5 .sw { width: 13px; height: 13px; border-radius: 4px; display: inline-block; }
+        #step-5 .switch { direction: ltr; width: 100%; background: var(--c29-face); color: var(--c29-faceink); border-radius: 10px; padding: 12px 14px 14px; box-shadow: inset 0 2px 0 #fff2; overflow-x: auto; }
+        #step-5 .brand { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; font-size: 12px; min-width: 580px; }
+        #step-5 .brand b { font-size: 18px; letter-spacing: .02em; }
+        #step-5 .leds { display: flex; gap: 6px; margin-left: auto; }
+        #step-5 .leds i { width: 9px; height: 9px; border-radius: 50%; background: #46d17a; }
+        #step-5 .leds i:last-child { background: #58636d; }
+        #step-5 .ports { display: grid; grid-template-columns: repeat(6,1fr) .35fr repeat(6,1fr) .35fr 1.25fr; grid-template-rows: auto auto; grid-auto-flow: column; gap: 6px 5px; min-width: 580px; }
+        #step-5 .port { width: 100%; min-width: 0; aspect-ratio: 3/4; border: 2px solid #0006; border-radius: 6px 6px 3px 3px; background: var(--c29-v1); color: #fff; cursor: pointer; font: 700 13px/1 inherit; display: flex; flex-direction: column; align-items: center; justify-content: space-between; padding: 6px 0 5px; transition: opacity .15s; }
+        #step-5 .port .tag { font-size: 10px; font-weight: 600; background: #0004; border-radius: 3px; padding: 1px 4px; }
+        #step-5 .port.v20 { background: var(--c29-v20); }
+        #step-5 .port.v30 { background: var(--c29-v30); }
+        #step-5 .port.vx { background: var(--c29-vx); }
+        #step-5 .port.trunk { background: var(--c29-trk); color: #1b1200; }
+        #step-5 .port.trunk .tag { background: #0002; }
+        #step-5 .port.off { background: repeating-linear-gradient(45deg,#4a545d,#4a545d 5px,#3c454d 5px,#3c454d 10px); color: #cfd8df; }
+        #step-5 .port.inact { border-style: dashed; }
+        #step-5 .port.dim { opacity: .22; }
+        #step-5 .port.ctx { outline: 3px dashed #fff; outline-offset: 2px; }
+        #step-5 .port[aria-pressed="true"] { box-shadow: 0 0 0 3px var(--c29-focus); }
+        #step-5 .port:focus-visible { outline: 3px solid var(--c29-focus); outline-offset: 2px; }
+        #step-5 .sub-card { background: var(--c29-panel); border: 1.5px solid var(--c29-line); border-radius: 14px; padding: 14px 16px; margin-top: 14px; }
+        #step-5 .sub-card h3 { font-size: 1.05rem; margin: 0 0 6px; color: var(--c29-ink); }
+        #step-5 .note { color: var(--c29-mute); margin: 0; font-size: 0.95rem; }
+        #step-5 .term { direction: ltr; text-align: left; background: #10171c; color: #dfe9e2; border-radius: 10px; padding: 12px; font: 13.5px/1.45 var(--font-code); height: 360px; overflow: auto; cursor: text; border: 1px solid #0006; margin-top: 8px; }
+        #step-5 .term pre { margin: 0; white-space: pre-wrap; word-break: break-word; font: inherit; }
+        #step-5 .term:focus-within { outline: 2px solid var(--c29-focus); }
+        #step-5 .in { display: flex; }
+        #step-5 #c29-inp { flex: 1; min-width: 0; background: none; border: 0; outline: 0; color: inherit; font: inherit; padding: 0; caret-color: #7ee0a6; }
+        #step-5 .row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+        #step-5 .btn { font-size: 0.9rem; font-weight: 700; border: 1.5px solid var(--c29-line); background: var(--paper); color: var(--c29-ink); border-radius: 8px; padding: 6px 14px; cursor: pointer; }
+        #step-5 .btn:hover { border-color: var(--red); }
+        #step-5 details { margin-top: 12px; }
+        #step-5 summary { cursor: pointer; font-weight: 700; font-size: 0.95rem; }
+        #step-5 table { border-collapse: collapse; width: 100%; margin-top: 8px; font-size: .9rem; }
+        #step-5 td { border-top: 1px solid var(--c29-line); padding: 4px 6px; vertical-align: top; }
+        #step-5 td:first-child { direction: ltr; text-align: left; font-family: var(--font-code); white-space: nowrap; color: var(--term); font-weight: 700; }
+        @media(prefers-reduced-motion:reduce) { #step-5 .port { transition: none; } }
 
         /* ---------- FORMATS ---------- */
         .eng-tag {
@@ -370,7 +431,10 @@
                             <span>04. ארכיטקטורת פרומפטים</span>
                         </button>
                         <button id="btn-step-5" onclick="switchStep(5)" class="nav-btn">
-                            <span>05. לוח פתרונות וסיום</span>
+                            <span>05. סימולטור</span>
+                        </button>
+                        <button id="btn-step-6" onclick="switchStep(6)" class="nav-btn">
+                            <span>06. לוח פתרונות וסיום</span>
                         </button>
                     </nav>
                 </div>
@@ -684,13 +748,58 @@
 
                         <div style="display: flex; justify-content: space-between;">
                             <button onclick="switchStep(3)" class="action-btn btn-sec">חזרה לסימולטור</button>
-                            <button id="btn-to-step-5" onclick="switchStep(5)" class="action-btn" disabled>המשך לסיכום המשימה</button>
+                            <button id="btn-to-step-5" onclick="switchStep(5)" class="action-btn" disabled>המשך לסימולטור CLI</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- STEP 5: REFLECTION & REPORT -->
+                <!-- STEP 5: CATALYST 2960 CLI SIMULATOR -->
                 <div id="step-5" class="step-container" style="display: none;">
+                    <div class="card">
+                        <h2 class="card-title">Catalyst 2960: הקלידו פקודות וראו את הפורטים משתנים</h2>
+                        <p class="lead">כל פקודה שתקלידו במסוף משנה מיד את צבע הפורטים בסוויטש. לחצו על פורט כדי לראות את מצבו.</p>
+
+                        <div class="chips" id="c29-chips" role="group" aria-label="סינון לפי סוג"></div>
+
+                        <div class="switch" role="group" aria-label="חזית הסוויטש">
+                            <div class="brand"><b>Catalyst 2960</b><span id="c29-hn">Switch</span><span>24 × FastEthernet + 2 × Gigabit</span><div class="leds"><i></i><i></i><i></i></div></div>
+                            <div class="ports" id="c29-ports"></div>
+                        </div>
+
+                        <section class="sub-card" aria-live="polite"><h3 id="c29-pt">בחרו פורט</h3><p class="note" id="c29-pi">לחצו על אחד הפורטים בתרשים.</p></section>
+
+                        <section class="sub-card">
+                            <h3>מסוף (CLI)</h3>
+                            <div class="term" id="c29-term"><pre id="c29-out"></pre><div class="in"><span id="c29-pr"></span><input id="c29-inp" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="שורת פקודה"></div></div>
+                            <div class="row">
+                                <button class="btn" id="c29-demo">הדגמה: הרץ את פקודות השיעור</button>
+                                <button class="btn" id="c29-reset">איפוס סוויטש (הגדרות יצרן)</button>
+                            </div>
+                            <details open><summary>קיצורים ופקודות שעובדים</summary>
+                            <table>
+                                <tr><td>en</td><td>enable: מעבר ל-Privileged mode (#)</td></tr>
+                                <tr><td>conf t</td><td>configure terminal: מצב הגדרות כלליות</td></tr>
+                                <tr><td>int fa0/4</td><td>interface: כניסה לפורט. אפשר גם <span dir="ltr">int range fa0/1 - 3</span></td></tr>
+                                <tr><td>sw mo ac / sw mo tr</td><td>switchport mode access / trunk</td></tr>
+                                <tr><td>sw ac vlan 20</td><td>שיוך הפורט ל-VLAN 20 (אם אין VLAN כזה, הסוויטש יוצר אותו)</td></tr>
+                                <tr><td>vlan 20 ← name X</td><td>יצירה ושם ל-VLAN</td></tr>
+                                <tr><td>sh vl br</td><td>show vlan brief (גם ב-config עם do)</td></tr>
+                                <tr><td>sh int status / sh int trunk / sh run</td><td>מצב הפורטים, Trunks, ההגדרות</td></tr>
+                                <tr><td>shutdown / no shutdown</td><td>כיבוי והדלקה של פורט</td></tr>
+                                <tr><td>exit / end / Ctrl+Z</td><td>חזרה מצב אחד / ישר ל-#</td></tr>
+                                <tr><td>? , Tab, ↑ ↓</td><td>עזרה, השלמה אוטומטית, היסטוריית פקודות</td></tr>
+                            </table></details>
+                        </section>
+
+                        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                            <button onclick="switchStep(4)" class="action-btn btn-sec">חזרה לפרומפטים</button>
+                            <button onclick="switchStep(6)" class="action-btn">המשך לסיכום המשימה</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STEP 6: REFLECTION & REPORT -->
+                <div id="step-6" class="step-container" style="display: none;">
                     <div class="card">
                         <h2 class="card-title">תעודת מעצב הרשתות הלוגיות שלך מוכנה!</h2>
                         <p style="margin-bottom: 16px;">סיכמת בהצלחה את נושא ה-VLAN-ים. להלן סיכום הישגייך ואפשרויות ייצוא הדוח למורה.</p>
@@ -730,6 +839,10 @@
 
                                 <button onclick="exportTeacherReport()" class="action-btn btn-teal" style="margin-top: 16px;">ייצא דוח מסכם למורה</button>
                             </div>
+                        </div>
+
+                        <div style="display: flex; justify-content: flex-start;">
+                            <button onclick="switchStep(5)" class="action-btn btn-sec">חזרה לסימולטור CLI</button>
                         </div>
                     </div>
                 </div>
@@ -811,13 +924,15 @@
         }
 
         function switchStep(stepNum) {
-            for (let i = 1; i <= 5; i++) {
-                document.getElementById(`step-${i}`).style.display = 'none';
+            for (let i = 1; i <= 6; i++) {
+                const el = document.getElementById(`step-${i}`);
+                if (el) el.style.display = 'none';
                 const btn = document.getElementById(`btn-step-${i}`);
                 if (btn) btn.classList.remove('active');
             }
 
-            document.getElementById(`step-${stepNum}`).style.display = 'block';
+            const targetEl = document.getElementById(`step-${stepNum}`);
+            if (targetEl) targetEl.style.display = 'block';
             const activeBtn = document.getElementById(`btn-step-${stepNum}`);
             if (activeBtn) activeBtn.classList.add('active');
 
@@ -871,8 +986,6 @@
             const feedback = document.getElementById('sim-feedback');
             feedback.style.display = 'block';
 
-            // בדיקת דומיין שידור לוגי גמיש ונכון פדגוגית:
-            // מוודאים שכל פורט משויך לאיזשהו VLAN, ושפורטים 1-2 באותו VLAN (HR), פורטים 3-4 באותו VLAN (R&D), ופורטים 5-6 באותו VLAN (Guest) בלי תלות בסדר צבע ספציפי
             const p1 = portAssignments[1], p2 = portAssignments[2];
             const p3 = portAssignments[3], p4 = portAssignments[4];
             const p5 = portAssignments[5], p6 = portAssignments[6];
@@ -942,6 +1055,249 @@
             try { applyDark(localStorage.getItem('vlan_sim_dark') === '1'); } catch (e) {}
             addLog("System initialized successfully.");
         };
+
+        /* ---------- Catalyst 2960 Simulator Logic (Step 5) ---------- */
+        (function() {
+            let S, filter = "all";
+            function init() {
+                S = { host: "Switch", vlans: { 1: "default" }, mode: "u", ctx: [], vid: 0, sel: null, ports: [] };
+                for (let i = 0; i < 26; i++) {
+                    const g = i >= 24;
+                    S.ports.push({
+                        n: g ? "Gi0/" + (i - 23) : "Fa0/" + (i + 1),
+                        l: (g ? "GigabitEthernet0/" + (i - 23) : "FastEthernet0/" + (i + 1)),
+                        mode: "dynamic auto",
+                        vlan: 1,
+                        shut: false,
+                        desc: ""
+                    });
+                }
+            }
+            const out = document.getElementById("c29-out"),
+                  inp = document.getElementById("c29-inp"),
+                  term = document.getElementById("c29-term");
+            let hist = [], hi = 0;
+            const P = t => { out.textContent += t + "\n"; term.scrollTop = term.scrollHeight; };
+            const pr = () => S.host + ({ u: ">", p: "#", c: "(config)#", v: "(config-vlan)#", i: S.ctx.length > 1 ? "(config-if-range)#" : "(config-if)#" })[S.mode];
+            const C = [];
+            const add = (m, w, f) => C.push({ m: m.split(","), w: w.split(" "), f });
+            const wAt = (c, i) => i < c.w.length ? c.w[i] : (c.w[c.w.length - 1] === "<*>" ? "<*>" : undefined);
+            function match(tk, mode) {
+                let cs = C.filter(c => c.m.includes(mode));
+                for (let i = 0; i < tk.length; i++) {
+                    const t = tk[i].toLowerCase();
+                    let nx = cs.filter(c => { const w = wAt(c, i); return w && (w[0] === "<" || w.startsWith(t)); });
+                    const ex = nx.filter(c => wAt(c, i) === t);
+                    if (ex.length) nx = ex;
+                    if (!nx.length) return { err: "inv", i };
+                    const d = new Set(nx.map(c => wAt(c, i)).filter(w => w[0] !== "<"));
+                    if (d.size > 1 && !nx.some(c => wAt(c, i)[0] === "<")) return { err: "amb", i };
+                    cs = nx;
+                }
+                return { cs };
+            }
+            function run(line) {
+                P(pr() + line);
+                const tk = line.trim().split(/\s+/).filter(Boolean);
+                if (!tk.length) return;
+                const st = [...line.matchAll(/\S+/g)].map(m => m.index);
+                let tt = tk, mode = S.mode, off = 0;
+                if (tk[0].toLowerCase() === "do" && "cvi".includes(mode)) {
+                    tt = tk.slice(1); mode = "p"; off = 1;
+                    if (!tt.length) { P("% Incomplete command."); return; }
+                }
+                const r = match(tt, mode);
+                if (r.err) {
+                    if (r.err === "amb") P('% Ambiguous command:  "' + tk.slice(0, r.i + 1 + off).join(" ") + '"');
+                    else P(" ".repeat(pr().length + st[r.i + off]) + "^\n% Invalid input detected at '^' marker.\n");
+                    return;
+                }
+                const c = r.cs.find(c => c.w.length === tt.length) || r.cs.find(c => c.w[c.w.length - 1] === "<*>" && tt.length >= c.w.length - 1);
+                if (!c) { P("% Incomplete command."); return; }
+                c.f(tt);
+                draw();
+            }
+            function help(txt) {
+                const sp = /\s$/.test(txt), tk = txt.trim().split(/\s+/).filter(Boolean);
+                const pre = sp ? tk : tk.slice(0, -1), part = sp ? "" : (tk[tk.length - 1] || "").toLowerCase();
+                P(pr() + txt + "?");
+                const r = match(pre, S.mode);
+                if (r.err) { P("% Unrecognized command"); return; }
+                const o = new Set();
+                r.cs.forEach(c => {
+                    const w = wAt(c, pre.length);
+                    if (w === undefined) { if (!part) o.add("<cr>"); }
+                    else if (w[0] === "<") { if (!part) o.add(w); }
+                    else if (w.startsWith(part)) o.add(w);
+                });
+                P([...o].map(w => "  " + w).join("\n") || "% Unrecognized command");
+            }
+            function tab() {
+                const v = inp.value;
+                if (/\s$/.test(v) || !v.trim()) return;
+                const tk = v.split(/\s+/), part = tk.pop().toLowerCase();
+                const r = match(tk.filter(Boolean), S.mode);
+                if (r.err) return;
+                const o = new Set();
+                r.cs.forEach(c => {
+                    const w = wAt(c, tk.filter(Boolean).length);
+                    if (w && w[0] !== "<" && w.startsWith(part)) o.add(w);
+                });
+                if (o.size === 1) inp.value = tk.join(" ") + (tk.length ? " " : "") + [...o][0] + " ";
+            }
+            inp.addEventListener("keydown", e => {
+                if (e.key === "Enter") { const v = inp.value; inp.value = ""; if (v.trim()) hist.push(v); hi = hist.length; run(v); prompt_(); }
+                else if (e.key === "Tab") { e.preventDefault(); tab(); }
+                else if (e.key === "?") { e.preventDefault(); help(inp.value); }
+                else if (e.key === "ArrowUp") { e.preventDefault(); if (hi > 0) inp.value = hist[--hi]; }
+                else if (e.key === "ArrowDown") { e.preventDefault(); hi < hist.length - 1 ? inp.value = hist[++hi] : (hi = hist.length, inp.value = ""); }
+                else if (e.ctrlKey && e.key.toLowerCase() === "z") {
+                    e.preventDefault();
+                    if ("cvi".includes(S.mode)) { P(pr() + inp.value + "^Z"); inp.value = ""; S.mode = "p"; prompt_(); draw(); }
+                }
+            });
+            term.onclick = () => inp.focus();
+            const prompt_ = () => {
+                document.getElementById("c29-pr").textContent = pr();
+                document.getElementById("c29-hn").textContent = S.host;
+                term.scrollTop = term.scrollHeight;
+            };
+            function parseIf(s) {
+                s = s.replace(/\s+/g, "");
+                const r = [];
+                for (const part of s.split(",")) {
+                    const m = /^(f|fa|fast|fastethernet|g|gi|gig|gigabitethernet)(\d)\/(\d+)(?:-(?:[a-z]+\d\/)?(\d+))?$/i.exec(part);
+                    if (!m || m[2] !== "0") return null;
+                    const a = +m[3], b = m[4] ? +m[4] : a, f = /^f/i.test(m[1]);
+                    if (b < a) return null;
+                    for (let n = a; n <= b; n++) {
+                        if (f) { if (n < 1 || n > 24) return null; r.push(n - 1); }
+                        else { if (n < 1 || n > 2) return null; r.push(23 + n); }
+                    }
+                }
+                return r;
+            }
+            const bad = () => P("% Invalid input detected at '^' marker.\n");
+            const vnum = s => { const n = +s; return Number.isInteger(n) && n >= 1 && n <= 4094 ? n : 0; };
+            add("u", "enable", () => S.mode = "p");
+            add("p", "disable", () => S.mode = "u");
+            add("p", "configure terminal", () => { P("Enter configuration commands, one per line.  End with CNTL/Z."); S.mode = "c"; });
+            add("u,p,c,v,i", "exit", () => { const m = S.mode; S.mode = { u: "u", p: "u", c: "p", v: "c", i: "c" }[m]; if (m === "u") P("Switch con0 is now available\n\nPress RETURN to get started."); });
+            add("c,v,i", "end", () => S.mode = "p");
+            add("c,v,i", "hostname <name>", t => S.host = t[1]);
+            add("c,v,i", "vlan <vlan-id>", t => { const n = vnum(t[1]); if (!n) return bad(); if (!S.vlans[n]) S.vlans[n] = "VLAN" + String(n).padStart(4, "0"); S.vid = n; S.mode = "v"; });
+            add("c,v,i", "no vlan <vlan-id>", t => { const n = vnum(t[2]); if (!n) return bad(); if (n === 1) return P("%Default VLAN 1 may not be deleted."); delete S.vlans[n]; });
+            add("v", "name <vlan-name>", t => S.vlans[S.vid] = t[1]);
+            add("c,v,i", "interface range <*>", t => { const r = t.length > 2 ? parseIf(t.slice(2).join("")) : null; if (t.length < 3) return P("% Incomplete command."); if (!r) return bad(); S.ctx = r; S.mode = "i"; });
+            add("c,v,i", "interface <if-name> <*>", t => { const s = t.slice(1).join(""); const r = /[-,]/.test(s) ? null : parseIf(s); if (!r) return bad(); S.ctx = r; S.mode = "i"; });
+            const eachP = f => S.ctx.forEach(i => f(S.ports[i]));
+            add("i", "switchport mode access", () => eachP(p => p.mode = "access"));
+            add("i", "switchport mode trunk", () => eachP(p => p.mode = "trunk"));
+            add("i", "switchport mode dynamic auto", () => eachP(p => p.mode = "dynamic auto"));
+            add("i", "no switchport mode", () => eachP(p => p.mode = "dynamic auto"));
+            add("i", "switchport access vlan <vlan-id>", t => {
+                const n = vnum(t[3]); if (!n) return bad();
+                if (!S.vlans[n]) { S.vlans[n] = "VLAN" + String(n).padStart(4, "0"); P("% Access VLAN does not exist. Creating vlan " + n); }
+                eachP(p => p.vlan = n);
+            });
+            add("i", "no switchport access vlan", () => eachP(p => p.vlan = 1));
+            add("i", "shutdown", () => eachP(p => { p.shut = true; P("%LINK-5-CHANGED: Interface " + p.l + ", changed state to administratively down"); }));
+            add("i", "no shutdown", () => eachP(p => p.shut = false));
+            add("i", "description <*>", t => eachP(p => p.desc = t.slice(1).join(" ")));
+            add("u,p", "show vlan brief", () => P(vbrief()));
+            add("u,p", "show vlan", () => P(vbrief()));
+            add("p", "show running-config", () => P(runcfg()));
+            add("u,p", "show interfaces status", () => P(istatus()));
+            add("u,p", "show interfaces trunk", () => P(itrunk()));
+            add("p", "write", () => P("Building configuration...\n[OK]"));
+            add("p", "write memory", () => P("Building configuration...\n[OK]"));
+            add("p", "copy running-config startup-config", () => P("Destination filename [startup-config]? \nBuilding configuration...\n[OK]"));
+            const pad = (s, n) => String(s).padEnd(n);
+            function vbrief() {
+                let o = pad("VLAN", 5) + pad("Name", 33) + pad("Status", 10) + "Ports\n" + "---- " + "-".repeat(32) + " " + "-".repeat(9) + " " + "-".repeat(31) + "\n";
+                Object.keys(S.vlans).map(Number).sort((a, b) => a - b).forEach(v => {
+                    const pl = S.ports.filter(p => p.mode !== "trunk" && p.vlan === v).map(p => p.n), L = [];
+                    for (let k = 0; k < pl.length; k += 4) L.push(pl.slice(k, k + 4).join(", ") + (k + 4 < pl.length ? "," : ""));
+                    o += pad(v, 5) + pad(S.vlans[v], 33) + pad("active", 10) + (L[0] || "") + "\n";
+                    L.slice(1).forEach(l => o += " ".repeat(48) + l + "\n");
+                });
+                return o + ["1002 fddi-default", "1003 token-ring-default", "1004 fddinet-default", "1005 trnet-default"].map(s => pad(s.slice(0, 4), 5) + pad(s.slice(5), 33) + "act/unsup").join("\n");
+            }
+            function runcfg() {
+                let o = "Building configuration...\n\nCurrent configuration : 1024 bytes\n!\nversion 15.0\n!\nhostname " + S.host + "\n!\n";
+                S.ports.forEach(p => {
+                    o += "interface " + p.l + "\n";
+                    if (p.desc) o += " description " + p.desc + "\n";
+                    if (p.vlan !== 1) o += " switchport access vlan " + p.vlan + "\n";
+                    if (p.mode !== "dynamic auto") o += " switchport mode " + p.mode + "\n";
+                    if (p.shut) o += " shutdown\n";
+                    o += "!\n";
+                });
+                return o + "end";
+            }
+            function istatus() {
+                let o = pad("Port", 10) + pad("Name", 19) + pad("Status", 13) + pad("Vlan", 11) + pad("Duplex", 8) + pad("Speed", 6) + "Type\n";
+                S.ports.forEach((p, i) => {
+                    o += pad(p.n, 10) + pad(p.desc.slice(0, 18), 19) + pad(p.shut ? "disabled" : "notconnect", 13) + pad(p.mode === "trunk" ? "trunk" : p.vlan, 11) + pad("auto", 8) + pad("auto", 6) + (i > 23 ? "10/100/1000BaseTX" : "10/100BaseTX") + "\n";
+                });
+                return o;
+            }
+            function itrunk() {
+                const t = S.ports.filter(p => p.mode === "trunk");
+                if (!t.length) return "";
+                return pad("Port", 12) + pad("Mode", 13) + pad("Encapsulation", 15) + pad("Status", 14) + "Native vlan\n" + t.map(p => pad(p.n, 12) + pad("on", 13) + pad("802.1q", 15) + pad("trunking", 14) + "1").join("\n") + "\n\n" + pad("Port", 12) + "Vlans allowed on trunk\n" + t.map(p => pad(p.n, 12) + "1-4094").join("\n");
+            }
+            const cls = p => p.mode === "trunk" ? "trunk" : p.vlan === 20 ? "v20" : p.vlan === 30 ? "v30" : p.vlan === 1 ? "v1" : "vx";
+            const FL = [["all", "הכול", null], ["v1", "VLAN 1 (ברירת מחדל)", "var(--c29-v1)"], ["v20", "VLAN 20", "var(--c29-v20)"], ["v30", "VLAN 30", "var(--c29-v30)"], ["vx", "VLAN אחר", "var(--c29-vx)"], ["trunk", "Trunk", "var(--c29-trk)"]];
+            function mk(i) {
+                const p = S.ports[i], b = document.createElement("button"), c = cls(p);
+                b.type = "button";
+                b.className = "port " + c + (p.shut ? " off" : "") + ((p.mode !== "trunk" && !S.vlans[p.vlan]) ? " inact" : "") + (filter !== "all" && c !== filter ? " dim" : "") + (S.mode === "i" && S.ctx.includes(i) ? " ctx" : "");
+                b.setAttribute("aria-pressed", S.sel === i);
+                const tg = p.shut ? "off" : p.mode === "trunk" ? "T" : p.vlan + (S.vlans[p.vlan] ? "" : "!");
+                b.setAttribute("aria-label", p.n + ", " + (p.mode === "trunk" ? "Trunk" : "VLAN " + p.vlan) + (p.shut ? ", shutdown" : ""));
+                b.innerHTML = "<span>" + (i < 24 ? i + 1 : "Gi" + (i - 23)) + '</span><span class="tag">' + tg + "</span>";
+                b.onclick = () => { S.sel = i; draw(); };
+                return b;
+            }
+            function draw() {
+                const g = document.getElementById("c29-ports");
+                g.innerHTML = "";
+                for (let c = 0; c < 12; c++) { g.append(mk(2 * c), mk(2 * c + 1)); if (c === 5) { g.append(sp(), sp()); } }
+                g.append(sp(), sp(), mk(24), mk(25));
+                const ch = document.getElementById("c29-chips");
+                ch.innerHTML = "";
+                FL.forEach(([k, t, col]) => {
+                    const b = document.createElement("button");
+                    b.type = "button";
+                    b.className = "chip";
+                    b.setAttribute("aria-pressed", filter === k);
+                    b.innerHTML = (col ? '<span class="sw" style="background:' + col + '"></span>' : "") + t + (k !== "all" ? " (" + S.ports.filter(p => cls(p) === k).length + ")" : "");
+                    b.onclick = () => { filter = k; draw(); };
+                    ch.append(b);
+                });
+                if (S.sel !== null) {
+                    const p = S.ports[S.sel];
+                    document.getElementById("c29-pt").textContent = p.n;
+                    let t = p.mode === "trunk" ? "פורט Trunk: נושא כמה VLANs עם תיוג 802.1Q ולא שייך ל-VLAN אחד." : "פורט שייך ל-VLAN " + p.vlan + (S.vlans[p.vlan] ? "" : " (ה-VLAN לא קיים, הפורט לא פעיל)") + ". מצב: " + (p.mode === "access" ? "access" : "dynamic auto (ברירת מחדל)") + ".";
+                    if (p.shut) t += " הפורט כבוי (shutdown).";
+                    document.getElementById("c29-pi").textContent = t;
+                }
+                prompt_();
+            }
+            const sp = () => { const d = document.createElement("div"); d.setAttribute("aria-hidden", "true"); return d; };
+            function banner() {
+                out.textContent = "";
+                P("Cisco IOS Software, C2960 Software\nסוויטש בהגדרות יצרן: כל הפורטים ב-VLAN 1. הקלידו en כדי להתחיל.\n");
+            }
+            document.getElementById("c29-reset").onclick = () => { init(); filter = "all"; banner(); draw(); inp.focus(); };
+            document.getElementById("c29-demo").onclick = () => {
+                init(); filter = "all"; banner();
+                ["enable", "conf t", "interface range fa0/1 - 3", "switchport mode access", "switchport access vlan 20", "interface fa0/4", "switchport mode trunk", "end", "show vlan brief"].forEach(l => { run(l); });
+                draw(); inp.focus();
+            };
+            init(); banner(); draw();
+        })();
     </script>
 </body>
 </html>
