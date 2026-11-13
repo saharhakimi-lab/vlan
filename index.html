@@ -374,6 +374,80 @@
         }
 
         .zoomable-img { width: 100%; height: auto; max-height: 160px; object-fit: cover; border-radius: 12px; border: 2px solid var(--line); cursor: pointer; }
+
+        /* ---------- תצוגת תמונה בגודל מלא (Lightbox Modal) ---------- */
+        .vlan-preview-box {
+            background: var(--bg);
+            border: 2px solid var(--line);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .vlan-preview-img {
+            max-width: 100%;
+            max-height: 460px;
+            border-radius: 12px;
+            border: 2px solid var(--line);
+            cursor: zoom-in;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: var(--shadow);
+        }
+        .vlan-preview-img:hover {
+            transform: scale(1.01);
+            border-color: var(--red);
+        }
+        .img-lightbox-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 12, 10, 0.9);
+            z-index: 2000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            backdrop-filter: blur(4px);
+        }
+        .img-lightbox-overlay.open {
+            display: flex;
+        }
+        .img-lightbox-content {
+            position: relative;
+            max-width: 95vw;
+            max-height: 92vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .img-lightbox-content img {
+            max-width: 95vw;
+            max-height: 86vh;
+            object-fit: contain;
+            border-radius: 12px;
+            border: 2px solid var(--line);
+            background: #fff;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        }
+        .img-lightbox-close {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--red);
+            color: #fff;
+            border: 2px solid #fff;
+            border-radius: 9999px;
+            padding: 8px 18px;
+            font-weight: 800;
+            font-size: 0.85rem;
+            z-index: 2010;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.4);
+        }
+        .img-lightbox-close:hover {
+            background: #991b1b;
+        }
     </style>
 </head>
 <body>
@@ -419,22 +493,22 @@
                     <h3 class="card-title" style="font-size: 0.9rem;">מפת המשימה</h3>
                     <nav>
                         <button id="btn-step-1" onclick="switchStep(1)" class="nav-btn active">
-                            <span>01. אבטחת מידע</span>
+                            <span>אבטחת מידע</span>
                         </button>
                         <button id="btn-step-2" onclick="switchStep(2)" class="nav-btn">
-                            <span>02. איך <span class="eng-tag">VLAN</span> עובד?</span>
+                            <span>איך <span class="eng-tag">VLAN</span> עובד?</span>
                         </button>
                         <button id="btn-step-3" onclick="switchStep(3)" class="nav-btn">
-                            <span>03. סימולטור בידוד פורטים</span>
+                            <span>סימולטור בידוד פורטים</span>
                         </button>
                         <button id="btn-step-4" onclick="switchStep(4)" class="nav-btn">
-                            <span>04. ארכיטקטורת פרומפטים</span>
+                            <span>הגדרת וילאן</span>
                         </button>
                         <button id="btn-step-5" onclick="switchStep(5)" class="nav-btn">
-                            <span>05. סימולטור</span>
+                            <span>סימולטור</span>
                         </button>
                         <button id="btn-step-6" onclick="switchStep(6)" class="nav-btn">
-                            <span>06. לוח פתרונות וסיום</span>
+                            <span>לוח פתרונות וסיום</span>
                         </button>
                     </nav>
                 </div>
@@ -683,72 +757,33 @@
 
                         <div style="display: flex; justify-content: space-between; margin-top: 20px;">
                             <button onclick="switchStep(2)" class="action-btn btn-sec">חזרה להסבר</button>
-                            <button id="btn-to-step-4" onclick="switchStep(4)" class="action-btn" disabled>המשך לתכנון פרומפט AI</button>
+                            <button id="btn-to-step-4" onclick="switchStep(4)" class="action-btn" disabled>המשך להגדרת וילאן</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- STEP 4: PROMPT ENGINEERING ARCHITECT -->
+                <!-- STEP 4: הגדרת וילאן -->
                 <div id="step-4" class="step-container" style="display: none;">
                     <div class="card">
-                        <h2 class="card-title">ארכיטקטורת פרומפטים: חלוקת קמפוס</h2>
-                        <p style="margin-bottom: 16px;">כעת תתפקד כמעצב רשתות ראשי. בנה פרומפט מקיף כדי להנחות את ה-AI לתכנן חלוקת VLAN עבור בית ספר תיכון בעל מספר בניינים!</p>
+                        <h2 class="card-title">הגדרת וילאן</h2>
+                        <p style="margin-bottom: 16px;">לחץ על התמונה או על כפתור ההגדלה כדי לפתוח את תרשים הגדרת ה-VLAN בגודל מלא.</p>
 
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 20px;">
-                            <div style="display: flex; flex-direction: column; gap: 12px;">
-                                <div>
-                                    <label style="font-size: 0.8rem; font-weight: 700;">1. הגדר את היקף המוסד:</label>
-                                    <select id="prompt-scale" onchange="updatePromptPreview()">
-                                        <option value="none">-- בחר היקף קמפוס --</option>
-                                        <option value="school">בית ספר עם 4 בניינים, 1000 תלמידים ורשת אורחים חופשית</option>
-                                        <option value="office">משרדי הייטק של 3 קומות עם מחלקות הנהלה, פיתוח וקופות</option>
-                                        <option value="hospital">מרכז רפואי רגיש המחייב בידוד מוחלט לציוד רפואי ורשת רופאים</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label style="font-size: 0.8rem; font-weight: 700;">2. הגדר מגבלות אבטחה:</label>
-                                    <select id="prompt-constraints" onchange="updatePromptPreview()">
-                                        <option value="none">-- בחר מגבלת אבטחה --</option>
-                                        <option value="isolate">חסימת תקשורת מוחלטת בין רשת הסטודנטים/אורחים לרשת המנהלה</option>
-                                        <option value="moderate">אישור מעבר תקשורת מנוהל ומוגבל לשרתים מרכזיים בלבד</option>
-                                        <option value="open">מעבר חופשי ללא הגבלות לטובת שיתוף משאבים מהיר</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label style="font-size: 0.8rem; font-weight: 700;">3. הגדרת אסטרטגיית חלוקת IP:</label>
-                                    <select id="prompt-ip" onchange="updatePromptPreview()">
-                                        <option value="none">-- בחר שיטת חלוקת IP --</option>
-                                        <option value="subnet">חלוקה לכתובות IP מסוג Subnets כגון 192.168.10.0 לכל VLAN</option>
-                                        <option value="flat">כתובת IP שטוחה ויחידה לכולם ללא סאבנטים נפרדים</option>
-                                    </select>
-                                </div>
-
-                                <div style="background: var(--bg); border: 2px solid var(--line); padding: 12px; border-radius: 12px;">
-                                    <span style="font-size: 0.7rem; color: var(--muted);">תצוגה מקדימה של הפרומפט:</span>
-                                    <p id="prompt-preview" class="eng-tag" style="display: block; font-size: 0.75rem; margin-top: 6px; white-space: pre-wrap;">בחר פרמטרים למעלה...</p>
-                                </div>
+                        <div class="vlan-preview-box">
+                            <img
+                                id="vlan-config-thumb"
+                                src="https://lh3.googleusercontent.com/d/1ELsUs0mbJwin2bjCgklD3Vo_5K34uV_d"
+                                alt="הגדרת וילאן"
+                                class="vlan-preview-img"
+                                onclick="openVlanLightbox()"
+                            >
+                            <div style="margin-top: 14px;">
+                                <button type="button" onclick="openVlanLightbox()" class="action-btn">הגדל תמונה לגודל מלא</button>
                             </div>
-
-                            <div style="display: flex; flex-direction: column; justify-content: space-between; background: var(--bg); border: 2px solid var(--line); padding: 16px; border-radius: 16px;">
-                                <div>
-                                    <h3 style="font-size: 0.85rem; color: var(--red-text); margin-bottom: 8px;">תוכנית הרשת שחוללה על ידי ה-AI:</h3>
-                                    <div id="ai-response-box" style="font-size: 0.85rem; line-height: 1.6; min-height: 180px;">אנא הגדר את רכיבי הפרומפט משמאל, ולאחר מכן לחץ על 'נתח ושרטט תוכנית רשת'.</div>
-                                </div>
-
-                                <button onclick="runVlanPromptSimulator()" class="action-btn" style="margin-top: 12px;">נתח ושרטט תוכנית רשת</button>
-                            </div>
-                        </div>
-
-                        <div id="prompt-achievement" style="display: none; background: #d8f3e6; border: 2px solid #0b6b4a; color: #0b6b4a; padding: 14px; border-radius: 12px; margin-bottom: 16px;">
-                            <b>הישג נפתח! מומחה הפרדה וירטואלית</b>
-                            <p style="font-size: 0.8rem;">הרכבת פרומפט מקצועי המספק פתרון VLAN ו-Subnetting משולב למניעת פריצות סייבר.</p>
                         </div>
 
                         <div style="display: flex; justify-content: space-between;">
                             <button onclick="switchStep(3)" class="action-btn btn-sec">חזרה לסימולטור</button>
-                            <button id="btn-to-step-5" onclick="switchStep(5)" class="action-btn" disabled>המשך לסימולטור CLI</button>
+                            <button id="btn-to-step-5" onclick="switchStep(5)" class="action-btn">המשך לסימולטור CLI</button>
                         </div>
                     </div>
                 </div>
@@ -792,7 +827,7 @@
                         </section>
 
                         <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-                            <button onclick="switchStep(4)" class="action-btn btn-sec">חזרה לפרומפטים</button>
+                            <button onclick="switchStep(4)" class="action-btn btn-sec">חזרה להגדרת וילאן</button>
                             <button onclick="switchStep(6)" class="action-btn">המשך לסיכום המשימה</button>
                         </div>
                     </div>
@@ -852,6 +887,14 @@
         </div>
     </main>
 
+    <!-- Lightbox לתמונה בגודל מלא -->
+    <div id="vlan-lightbox" class="img-lightbox-overlay" onclick="closeVlanLightbox(event)">
+        <button type="button" class="img-lightbox-close" onclick="closeVlanLightbox(event, true)">✕ סגור תמונה</button>
+        <div class="img-lightbox-content" onclick="event.stopPropagation()">
+            <img src="https://lh3.googleusercontent.com/d/1ELsUs0mbJwin2bjCgklD3Vo_5K34uV_d" alt="הגדרת וילאן בגודל מלא">
+        </div>
+    </div>
+
     <!-- Floating Assistant Bot -->
     <div class="floating-bot-container">
         <div id="bot-card" class="floating-bot-card" style="display: none;">
@@ -905,12 +948,34 @@
             card.style.display = card.style.display === 'none' ? 'flex' : 'none';
         }
 
+        // Lightbox פתיחה וסגירה של תמונת הגדרת וילאן
+        function openVlanLightbox() {
+            const lb = document.getElementById('vlan-lightbox');
+            if (lb) {
+                lb.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+
+        function closeVlanLightbox(e, force) {
+            const lb = document.getElementById('vlan-lightbox');
+            if (force || (e && e.target === lb)) {
+                lb.classList.remove('open');
+                document.body.style.overflow = '';
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeVlanLightbox(null, true);
+            }
+        });
+
         // State Management
         let xp = 180;
         let activeStep = 1;
         let currentLevel = "שוליית נתבים";
         let hasPassedSim = false;
-        let hasPassedPrompt = false;
 
         let activeVlanColor = 'vlan10';
         let portAssignments = { 1: 'none', 2: 'none', 3: 'none', 4: 'none', 5: 'none', 6: 'none' };
@@ -1004,26 +1069,6 @@
                 feedback.style.background = '#fcdcd6'; feedback.style.color = '#a11a1a';
                 feedback.innerHTML = '<b>נכשלה בדיקת הבידוד!</b> ודא שכל הפורטים שוייכו, ושכל מחלקה (פורטים 1-2, פורטים 3-4, פורטים 5-6) מוגדרת תחת רשת (VLAN) נפרדת ומבודדת מהאחרות.';
             }
-        }
-
-        function updatePromptPreview() {
-            const scale = document.getElementById('prompt-scale').value;
-            const constraints = document.getElementById('prompt-constraints').value;
-            const ip = document.getElementById('prompt-ip').value;
-            document.getElementById('prompt-preview').textContent = `תכנן רשת עבור: ${scale}, עם מגבלת אבטחה: ${constraints}, ושיטת IP: ${ip}`;
-        }
-
-        function runVlanPromptSimulator() {
-            const box = document.getElementById('ai-response-box');
-            box.innerHTML = '<span style="color:var(--muted)">ה-AI מנתח את הפרומפט ומחשב תוכנית רשת...</span>';
-            setTimeout(() => {
-                box.innerHTML = '<b>תוכנית רשת שהופקה בהצלחה:</b><br>• VLAN 10 מנהלה ומורים IP: 192.168.10.0/24<br>• VLAN 20 תלמידים IP: 192.168.20.0/24<br>• VLAN 30 אורחים IP: 192.168.30.0/24';
-                if (!hasPassedPrompt) {
-                    hasPassedPrompt = true; addXP(80);
-                    document.getElementById('prompt-achievement').style.display = 'block';
-                    document.getElementById('btn-to-step-5').disabled = false;
-                }
-            }, 1000);
         }
 
         function resetProgress() {
